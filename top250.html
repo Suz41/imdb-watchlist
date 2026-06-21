@@ -590,6 +590,23 @@
     .toast.show {
       opacity: 1;
     }
+
+    /* Minimal movie rank number badge */
+    .rank-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(0, 0, 0, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      z-index: 5;
+      font-family: var(--font-body);
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -605,7 +622,6 @@
       </div>
       <nav class="header-nav">
         <a href="index.html" class="nav-link"><i class="fa-solid fa-list-check"></i> Watchlist</a>
-        <a href="top500.html" class="nav-link"><i class="fa-solid fa-trophy"></i> Top 500</a>
         <a href="top250.html" class="nav-link active"><i class="fa-solid fa-star"></i> Top 250</a>
       </nav>
       <div class="header-right">
@@ -800,6 +816,18 @@
           watchedSet = new Set(list);
         } catch(e) {}
       }
+
+      // Clear "failed" entries to re-fetch with improved fallback algorithm
+      let changed = false;
+      for (const title in apiPosters) {
+        if (apiPosters[title] === "failed") {
+          delete apiPosters[title];
+          changed = true;
+        }
+      }
+      if (changed) {
+        localStorage.setItem('imdb_api_posters_v2', JSON.stringify(apiPosters));
+      }
     }
 
     function saveLocalStorage() {
@@ -941,9 +969,16 @@
     // Fetch poster for a movie from TMDB
     async function fetchMoviePoster(movie) {
       try {
-        const url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(movie.title)}&primary_release_year=${movie.year}`;
-        const res = await fetch(url);
-        const data = await res.json();
+        let url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(movie.title)}&primary_release_year=${movie.year}`;
+        let res = await fetch(url);
+        let data = await res.json();
+        
+        // Fallback: search without release year constraint if strict filtering returns no results
+        if ((!data.results || data.results.length === 0) && movie.year) {
+          url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(movie.title)}`;
+          res = await fetch(url);
+          data = await res.json();
+        }
         
         if (data.results && data.results.length > 0 && data.results[0].poster_path) {
           const posterUrl = `https://image.tmdb.org/t/p/w500${data.results[0].poster_path}`;
@@ -967,6 +1002,12 @@
             });
             img.src = posterUrl;
             card.appendChild(img);
+
+            // Add rank badge for visual check on image overlay
+            const rankBadge = document.createElement("div");
+            rankBadge.className = "rank-badge";
+            rankBadge.textContent = movie.rank;
+            card.appendChild(rankBadge);
           }
         } else {
           // If TMDB returns no results, store "failed" in cache to skip in future
@@ -1147,6 +1188,12 @@
           });
           img.src = movie.poster;
           card.appendChild(img);
+
+          // Add rank badge for visual check on image overlay
+          const rankBadge = document.createElement("div");
+          rankBadge.className = "rank-badge";
+          rankBadge.textContent = movie.rank;
+          card.appendChild(rankBadge);
         } else {
           const placeholder = document.createElement("div");
           placeholder.className = "placeholder";
