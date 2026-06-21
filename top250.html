@@ -16,17 +16,17 @@
 
   <style>
     :root {
-      --bg: #070709;
-      --bg-surface: #0f0f13;
-      --bg-card: #15151c;
-      --border: rgba(255, 255, 255, 0.05);
-      --border-hover: rgba(245, 197, 24, 0.25);
-      --accent: #f5c518;
-      --accent-copper: #e0a96d;
-      --text: #f3f4f6;
-      --text-dim: #9ca3af;
-      --text-dark: #555866;
-      --glass: rgba(15, 15, 19, 0.75);
+      --bg: #0a0a0a;
+      --bg-surface: #121212;
+      --bg-card: #181818;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.3);
+      --accent: #ffffff;
+      --accent-copper: #888888;
+      --text: #ffffff;
+      --text-dim: #a0a0a0;
+      --text-dark: #555555;
+      --glass: rgba(10, 10, 10, 0.8);
       --font-display: 'Playfair Display', Georgia, serif;
       --font-body: 'Outfit', sans-serif;
     }
@@ -123,7 +123,7 @@
 
     .nav-link.active {
       color: var(--accent);
-      background: rgba(245, 197, 24, 0.08);
+      background: rgba(255, 255, 255, 0.08);
       font-weight: 600;
     }
 
@@ -168,7 +168,7 @@
 
     /* Ambient background lighting */
     .ambient-header {
-      background: radial-gradient(circle at 50% 0%, rgba(224, 169, 109, 0.06) 0%, rgba(7, 7, 9, 0) 70%);
+      background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0) 70%);
       padding: 40px 0 20px;
       border-bottom: 1px solid var(--border);
     }
@@ -274,7 +274,7 @@
     .search-box:focus {
       outline: none;
       border-color: var(--accent);
-      box-shadow: 0 0 10px rgba(245, 197, 24, 0.1);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
     }
 
     .sort-dropdown {
@@ -322,7 +322,7 @@
     .poster:hover {
       transform: translateY(-4px) scale(1.03);
       border-color: var(--border-hover);
-      box-shadow: 0 8px 20px rgba(245, 197, 24, 0.15);
+      box-shadow: 0 8px 20px rgba(255, 255, 255, 0.08);
     }
 
     .poster img {
@@ -437,7 +437,7 @@
       opacity: 1;
       filter: none;
       border-color: var(--border-hover);
-      box-shadow: 0 0 15px rgba(245, 197, 24, 0.05);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.02);
     }
 
     .badge-icon {
@@ -455,7 +455,7 @@
     }
 
     .badge-card.unlocked .badge-icon {
-      background: rgba(245, 197, 24, 0.1);
+      background: rgba(255, 255, 255, 0.05);
       border-color: var(--accent);
       color: var(--accent);
     }
@@ -849,8 +849,8 @@
       } catch (err) {
         console.error("Error loading JSON database:", err);
         grid.innerHTML = `
-          <div class="loader-overlay" style="color: #ff6b6b; text-align: center;">
-            <i class="fa-solid fa-triangle-exclamation" style="font-size: 32px; margin-bottom: 12px;"></i>
+          <div class="loader-overlay" style="color: var(--text-dim); text-align: center;">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 32px; margin-bottom: 12px; color: var(--text-dark);"></i>
             <p style="font-weight: 600;">Failed to load movies-250.json</p>
             <p style="font-size: 13px; opacity: 0.8; margin-top: 5px;">Ensure the file is present in your server's root folder.</p>
           </div>
