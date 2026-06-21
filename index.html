@@ -706,53 +706,12 @@
     // Hardcoded TMDB API Key from user configuration
     const API_KEY = "4f09deb9e0cba637e35e8490ba35dd3f";
 
-    // Initial set of posters to avoid instantly exhausting the API on first load
-    const BASE_POSTERS = {
-      "The Shawshank Redemption": "https://image.tmdb.org/t/p/w500/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg",
-      "The Godfather": "https://image.tmdb.org/t/p/w500/3bhkrj58Vtu7enYsRolD1fZdja1.jpg",
-      "The Dark Knight": "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
-      "The Godfather: Part II": "https://image.tmdb.org/t/p/w500/hek3koDUyRQk7IFIrvGffvZAflb.jpg",
-      "12 Angry Men": "https://image.tmdb.org/t/p/w500/ow3wq89wM8qd5X7hWKxiRfsFf9C.jpg",
-      "Schindler's List": "https://image.tmdb.org/t/p/w500/sF1U4EUQS8YHUYjNl3pMGNIQyr0.jpg",
-      "The Lord of the Rings: The Return of the King": "https://image.tmdb.org/t/p/w500/rCzpDGLbOoPwLjy3OAm5NUPOTrC.jpg",
-      "Pulp Fiction": "https://image.tmdb.org/t/p/w500/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg",
-      "The Lord of the Rings: The Fellowship of the Ring": "https://image.tmdb.org/t/p/w500/6oom5QYQ2yQTMJIbnvbkBL9cHo6.jpg",
-      "The Good, the Bad and the Ugly": "https://image.tmdb.org/t/p/w500/bX2xnavhMYjWDoZp1VM6VnU1xwe.jpg",
-      "Forrest Gump": "https://image.tmdb.org/t/p/w500/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg",
-      "Fight Club": "https://image.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
-      "The Lord of the Rings: The Two Towers": "https://image.tmdb.org/t/p/w500/5VTN0pR8gcqV3EPUHHfMGnJYN9L.jpg",
-      "Inception": "https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
-      "Star Wars: Episode V - The Empire Strikes Back": "https://image.tmdb.org/t/p/w500/7BuH8itoSrLExs2GIrU0WdNO34O.jpg",
-      "The Matrix": "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
-      "Goodfellas": "https://image.tmdb.org/t/p/w500/aKuFiU82s5ISJpGZp7YkIr3kCUd.jpg",
-      "One Flew Over the Cuckoo's Nest": "https://image.tmdb.org/t/p/w500/3jcbjz1L1nC2rY6u8ZntO3vO12G.jpg",
-      "Seven": "https://image.tmdb.org/t/p/w500/6yoghtyTpznpBik8EngEmJskVPh.jpg",
-      "Seven Samurai": "https://image.tmdb.org/t/p/w500/8OKm7HD26zG775yG5Qy6b7617d5.jpg"
-    };
-
     // Load Custom Cached Posters from LocalStorage
     let apiPosters = {};
     try {
       const saved = localStorage.getItem('imdb_api_posters_v2');
       if (saved) apiPosters = JSON.parse(saved);
     } catch(e) {}
-
-    function getBasePoster(title) {
-      const t = title.toLowerCase().trim();
-      if (t === "il buono, il brutto, il cattivo" || t === "the good, the bad and the ugly") {
-        return BASE_POSTERS["The Good, the Bad and the Ugly"];
-      }
-      if (t === "shichinin no samurai" || t === "seven samurai") {
-        return BASE_POSTERS["Seven Samurai"];
-      }
-      if (t === "se7en" || t === "seven") {
-        return BASE_POSTERS["Seven"];
-      }
-      if (t === "the godfather part ii" || t === "the godfather: part ii") {
-        return BASE_POSTERS["The Godfather: Part II"];
-      }
-      return BASE_POSTERS[title];
-    }
 
     // Application States
     let movies = [];
@@ -853,12 +812,12 @@
           m.id = `m${idx + 1}`;
           m.title = m.name; // map name to title for TMDB loop
           
-          // Use cached TMDB poster, or fallback to the local Amazon thumb_url/image_url
+          // Use cached TMDB poster, or load dynamically in viewport
           const cached = apiPosters[m.title];
           if (cached && cached !== "failed") {
             m.poster = cached;
           } else {
-            m.poster = getBasePoster(m.title) || m.thumb_url || m.image_url;
+            m.poster = undefined;
           }
         });
 
@@ -897,9 +856,7 @@
 
     // Determine if movie still needs a TMDB query
     function needsTmdbFetch(movie) {
-      if (apiPosters[movie.title] !== undefined) return false;
-      if (getBasePoster(movie.title)) return false;
-      return true;
+      return apiPosters[movie.title] === undefined;
     }
 
     // Setup IntersectionObserver to prioritize viewport fetching
