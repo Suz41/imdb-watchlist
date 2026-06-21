@@ -635,7 +635,7 @@
   <main class="container">
     <!-- Grid View Tab Content -->
     <div id="home-view">
-      <div class="filter-panel">
+      <div class="filter-panel" id="search-container">
         <div class="search-box-wrap">
           <i class="fa-solid fa-magnifying-glass search-box-icon"></i>
           <input type="text" id="search" class="search-box" placeholder="Filter films by title, director, actors, year..." oninput="handleSearch(this.value)" />
@@ -659,7 +659,7 @@
     <!-- Achievements Tab Content -->
     <div id="badges-view" class="badges-view">
       <h2 style="font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 24px; text-align: center;">Your Achievements</h2>
-      <div class="badges-grid" id="badges-container">
+      <div class="badges-grid" id="badge-list">
         <!-- Injected Dynamically -->
       </div>
     </div>
@@ -667,13 +667,13 @@
 
   <!-- Bottom navigation -->
   <div class="bottom-nav">
-    <div class="nav-btn active" id="btn-home" onclick="switchTab('home-view')">
+    <div class="nav-btn active" id="btn-home" onclick="switchTab('home')">
       <i class="fa-solid fa-grip"></i>
-      <span>Grid View</span>
+      <span>Home</span>
     </div>
-    <div class="nav-btn" id="btn-badges" onclick="switchTab('badges-view')">
+    <div class="nav-btn" id="btn-badges" onclick="switchTab('badges')">
       <i class="fa-solid fa-award"></i>
-      <span>Achievements (<span id="unlocked-count">0</span>/10)</span>
+      <span>Badges (<span id="unlocked-count">0</span>/10)</span>
     </div>
   </div>
 
@@ -682,7 +682,7 @@
 
   <script>
     // Storage Keys
-    const WATCHED_KEY = "imdb_top250_watched";
+    const WATCHED_KEY = "imdb_tracker_list_v2";
     const WATCHLIST_KEY = "imdb_watchlist_data";
 
     // Hardcoded TMDB API Key from user configuration
@@ -745,10 +745,10 @@
 
     // Badges definitions
     const ACHIEVEMENTS = [
-      { id: "apprentice", title: "Cinephile Novice", desc: "Watch at least 5 movies from the list.", icon: "fa-medal", type: "count", target: 5 },
-      { id: "buff", title: "Cinema Buff", desc: "Watch at least 25 movies from the list.", icon: "fa-award", type: "count", target: 25 },
-      { id: "elite", title: "Cinephile Elite", desc: "Watch at least 100 movies from the list.", icon: "fa-crown", type: "count", target: 100 },
-      { id: "conqueror", title: "IMDb Master", desc: "Watch all 250 movies from the list.", icon: "fa-trophy", type: "count", target: 250 },
+      { id: "b1", title: "Cinephile Novice", desc: "Watch at least 5 movies from the list.", icon: "fa-medal", type: "count", target: 5 },
+      { id: "b2", title: "Cinema Buff", desc: "Watch at least 25 movies from the list.", icon: "fa-award", type: "count", target: 25 },
+      { id: "b3", title: "Cinephile Elite", desc: "Watch at least 100 movies from the list.", icon: "fa-crown", type: "count", target: 100 },
+      { id: "b4", title: "IMDb Master", desc: "Watch all 250 movies from the list.", icon: "fa-trophy", type: "count", target: 250 },
       { id: "nolan", title: "Nolan Disciple", desc: "Watch 5 Christopher Nolan films.", icon: "fa-brain", type: "director", director: "Christopher Nolan", target: 5 },
       { id: "godfather", title: "The Family", desc: "Watch both The Godfather and The Godfather Part II.", icon: "fa-handshake", type: "special_godfather", target: 2 },
       { id: "classics", title: "Vintage Explorer", desc: "Watch 10 movies released before 1970.", icon: "fa-hourglass-half", type: "year", yearLimit: 1970, target: 10 },
@@ -757,8 +757,17 @@
       { id: "crime", title: "Crime Syndicate", desc: "Watch 8 Crime movies.", icon: "fa-user-secret", type: "genre", genre: "Crime", target: 8 }
     ];
 
+    // DOM cache
+    let viewHome, viewBadges, searchContainer, btnHome, btnBadges;
+
     // Load application dependencies
     window.addEventListener("DOMContentLoaded", () => {
+      viewHome = document.getElementById("home-view");
+      viewBadges = document.getElementById("badges-view");
+      searchContainer = document.getElementById("search-container");
+      btnHome = document.getElementById("btn-home");
+      btnBadges = document.getElementById("btn-badges");
+
       loadLocalStorage();
       loadDatabase();
     });
@@ -793,8 +802,11 @@
         const data = await response.json();
         
         movies = data;
-        // Assign rank numbers based on rating sort
-        movies.forEach((m, idx) => m.rank = idx + 1);
+        // Assign rank numbers and ID strings based on rating sort
+        movies.forEach((m, idx) => {
+          m.rank = idx + 1;
+          m.id = `m${idx + 1}`;
+        });
 
         activeList = [...movies];
         
@@ -845,9 +857,9 @@
             localStorage.setItem('imdb_api_posters_v2', JSON.stringify(apiPosters));
             
             // Dynamically update image source if displayed on current view
-            const idx = movies.findIndex(x => x.name === title);
-            if (idx >= 0) {
-              const img = document.querySelector(`#poster-card-${idx} img`);
+            const targetMovie = movies.find(x => x.name === title);
+            if (targetMovie) {
+              const img = document.querySelector(`#poster-card-${targetMovie.id} img`);
               if (img) {
                 img.src = path;
                 img.style.display = 'block';
@@ -862,33 +874,25 @@
       }
     }
 
-    // Toggle movie watched status
-    function toggleWatched(idx) {
-      const movie = movies[idx];
+    // Toggle movie watched status using ID string (e.g., 'm1', 'm2')
+    function toggleWatched(id, cardElement) {
+      const movie = movies.find(m => m.id === id);
       if (!movie) return;
 
-      const titleKey = movie.name;
-
-      if (watchedSet.has(titleKey)) {
-        watchedSet.delete(titleKey);
+      if (watchedSet.has(id)) {
+        watchedSet.delete(id);
         updatePersonalWatchlist(movie, "want");
+        if (cardElement) cardElement.classList.remove("watched");
         showToast(`Removed "${movie.name}" from watched list`);
       } else {
-        watchedSet.add(titleKey);
+        watchedSet.add(id);
         updatePersonalWatchlist(movie, "watched");
+        if (cardElement) cardElement.classList.add("watched");
         showToast(`Marked "${movie.name}" as watched`);
       }
 
       saveLocalStorage();
       updateProgress();
-      
-      // Update UI item state locally
-      const item = document.getElementById(`poster-card-${idx}`);
-      if (item) {
-        if (watchedSet.has(titleKey)) item.classList.add("watched");
-        else item.classList.remove("watched");
-      }
-
       calculateBadgesProgress();
       updateNavStats();
     }
@@ -909,13 +913,13 @@
         movies.forEach(m => {
           const titleKeyNormalized = m.name.toLowerCase().trim();
           const isWatchedInWatchlist = watchedTitles.has(titleKeyNormalized);
-          const isWatchedInTop250 = watchedSet.has(m.name);
+          const isWatchedInTop250 = watchedSet.has(m.id);
 
           if (isWatchedInWatchlist && !isWatchedInTop250) {
-            watchedSet.add(m.name);
+            watchedSet.add(m.id);
             changed = true;
           } else if (!isWatchedInWatchlist && isWatchedInTop250) {
-            watchedSet.delete(m.name);
+            watchedSet.delete(m.id);
             changed = true;
           }
         });
@@ -975,7 +979,7 @@
 
       // Count unlocked achievements
       let unlockedCount = 0;
-      const watchedMovies = movies.filter(m => watchedSet.has(m.name));
+      const watchedMovies = movies.filter(m => watchedSet.has(m.id));
 
       ACHIEVEMENTS.forEach(badge => {
         let current = 0;
@@ -1017,19 +1021,18 @@
       }
 
       activeList.forEach(m => {
-        const originalIndex = movies.findIndex(x => x.name === m.name);
         const tmdbPoster = apiPosters[m.name] || getBasePoster(m.name);
         const posterUrl = tmdbPoster || m.thumb_url || m.image_url;
 
         const card = document.createElement("div");
-        card.className = "poster" + (watchedSet.has(m.name) ? " watched" : "");
-        card.id = `poster-card-${originalIndex}`;
-        card.setAttribute("onclick", `toggleWatched(${originalIndex})`);
+        card.className = "poster" + (watchedSet.has(m.id) ? " watched" : "");
+        card.id = `poster-card-${m.id}`;
+        card.setAttribute("onclick", `toggleWatched('${m.id}', this)`);
         card.setAttribute("title", `${m.name} (${m.year})`);
 
         card.innerHTML = `
           <div class="placeholder">
-            <div class="rank">${originalIndex + 1}</div>
+            <div class="rank">${m.rank}</div>
             <div class="title">${m.name}</div>
           </div>
           <img src="${posterUrl}" alt="${m.name}" onerror="this.style.display='none'" loading="lazy" />
@@ -1040,17 +1043,18 @@
     }
 
     // Tabs toggle
-    function switchTab(viewId) {
-      document.getElementById("home-view").style.display = viewId === "home-view" ? "block" : "none";
-      document.getElementById("badges-view").style.display = viewId === "badges-view" ? "block" : "none";
+    function switchTab(tabId) {
+      viewHome.style.display = tabId === 'home' ? 'block' : 'none';
+      searchContainer.style.display = tabId === 'home' ? 'block' : 'none';
+      viewBadges.style.display = tabId === 'badges' ? 'block' : 'none';
 
-      document.getElementById("btn-home").classList.toggle("active", viewId === "home-view");
-      document.getElementById("btn-badges").classList.toggle("active", viewId === "badges-view");
+      btnHome.classList.toggle('active', tabId === 'home');
+      btnBadges.classList.toggle('active', tabId === 'badges');
     }
 
     // Render Badges
     function renderBadges() {
-      const container = document.getElementById("badges-container");
+      const container = document.getElementById("badge-list");
       container.innerHTML = "";
 
       ACHIEVEMENTS.forEach(badge => {
@@ -1079,7 +1083,7 @@
 
     function calculateBadgesProgress() {
       let unlockedCount = 0;
-      const watchedMovies = movies.filter(m => watchedSet.has(m.name));
+      const watchedMovies = movies.filter(m => watchedSet.has(m.id));
 
       ACHIEVEMENTS.forEach(badge => {
         let current = 0;
