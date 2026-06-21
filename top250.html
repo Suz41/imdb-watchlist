@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IMDb Top 250 — Achievements &amp; Poster Tracker</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="An interactive grid-based completion tracker for the IMDb Top 250 all-time movies with achievements, dynamic statistics, and synchronization." />
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,700;1,600&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #070709;
+      --bg-surface: #0f0f13;
+      --bg-card: #15151c;
+      --border: rgba(255, 255, 255, 0.05);
+      --border-hover: rgba(245, 197, 24, 0.25);
+      --accent: #f5c518;
+      --accent-copper: #e0a96d;
+      --text: #f3f4f6;
+      --text-dim: #9ca3af;
+      --text-dark: #555866;
+      --glass: rgba(15, 15, 19, 0.75);
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'Outfit', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      line-height: 1.4;
+      overflow-x: hidden;
+      padding-bottom: 80px; /* Space for bottom nav on mobile */
+    }
+
+    /* Header styling */
+    header {
+      position: sticky;
+      top: 0;
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+      padding: 14px 0;
+    }
+
+    .header-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo h1 {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .logo span {
+      background: var(--accent);
+      color: #000;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-body);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .nav-link {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .nav-link.active {
+      color: var(--accent);
+      background: rgba(245, 197, 24, 0.08);
+      font-weight: 600;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+    }
+
+    .quick-stats-pill {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .quick-stats-pill span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    @media (max-width: 600px) {
+      .header-wrap {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .header-nav {
+        gap: 12px;
+      }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Ambient background lighting */
+    .ambient-header {
+      background: radial-gradient(circle at 50% 0%, rgba(224, 169, 109, 0.06) 0%, rgba(7, 7, 9, 0) 70%);
+      padding: 40px 0 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .title-area {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .title-area h1 {
+      font-family: var(--font-display);
+      font-size: clamp(26px, 4vw, 42px);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .title-area span {
+      background: var(--accent);
+      color: #000;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Global Progress Header */
+    .progress-bar-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      max-width: 700px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-dim);
+    }
+
+    .progress-bar-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(to right, var(--accent-copper), var(--accent));
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+
+    /* Filters and Search Bar */
+    .filter-panel {
+      margin: 30px auto;
+      max-width: 900px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 15px;
+    }
+
+    @media (max-width: 576px) {
+      .filter-panel {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .search-box-wrap {
+      position: relative;
+    }
+
+    .search-box-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dark);
+    }
+
+    .search-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px 12px 42px;
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 14px;
+      width: 100%;
+      transition: all 0.2s;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 10px rgba(245, 197, 24, 0.1);
+    }
+
+    .sort-dropdown {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .sort-dropdown:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    /* Grid Layout for posters */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 14px;
+      padding: 10px 0 50px;
+    }
+
+    @media (max-width: 600px) {
+      .grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+      }
+    }
+
+    .poster {
+      position: relative;
+      aspect-ratio: 2/3;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .poster:hover {
+      transform: translateY(-4px) scale(1.03);
+      border-color: var(--border-hover);
+      box-shadow: 0 8px 20px rgba(245, 197, 24, 0.15);
+    }
+
+    .poster img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: all 0.3s ease;
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    .placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      text-align: center;
+      background: linear-gradient(135deg, #16161f 0%, #0e0e12 100%);
+      z-index: 0;
+    }
+
+    .placeholder .rank {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent-copper);
+      line-height: 1;
+    }
+
+    .placeholder .title {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 6px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.3;
+      font-weight: 500;
+    }
+
+    /* Watched state */
+    .poster.watched img {
+      filter: grayscale(100%) contrast(0.8);
+      opacity: 0.22;
+    }
+
+    .poster.watched .placeholder {
+      opacity: 0.35;
+    }
+
+    .poster.watched::after {
+      content: "\f00c";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 22px;
+      height: 22px;
+      background: var(--accent);
+      color: #000;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      z-index: 2;
+      animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0); }
+      100% { transform: scale(1); }
+    }
+
+    /* Achievements Grid */
+    .badges-view {
+      display: none;
+      padding: 20px 0 50px;
+    }
+
+    .badges-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .badge-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      gap: 15px;
+      transition: all 0.3s ease;
+      opacity: 0.55;
+      filter: grayscale(100%);
+    }
+
+    .badge-card.unlocked {
+      opacity: 1;
+      filter: none;
+      border-color: var(--border-hover);
+      box-shadow: 0 0 15px rgba(245, 197, 24, 0.05);
+    }
+
+    .badge-icon {
+      width: 50px;
+      height: 50px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+
+    .badge-card.unlocked .badge-icon {
+      background: rgba(245, 197, 24, 0.1);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .badge-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0;
+    }
+
+    .badge-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-bottom: 2px;
+    }
+
+    .badge-card.unlocked .badge-title {
+      color: #fff;
+    }
+
+    .badge-desc {
+      font-size: 11px;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    .badge-card.unlocked .badge-desc {
+      color: var(--text-dim);
+    }
+
+    .badge-progress-track {
+      height: 4px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .badge-progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Loader */
+    .loader-overlay {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 0;
+      color: var(--text-dim);
+      gap: 15px;
+    }
+
+    .spinner {
+      border: 3px solid rgba(255,255,255,0.05);
+      border-top: 3px solid var(--accent);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Bottom sticky navigation for mobile views */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      background: rgba(14, 14, 18, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border);
+      z-index: 99;
+    }
+
+    .nav-btn {
+      flex: 1;
+      padding: 16px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-dim);
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.2s;
+    }
+
+    .nav-btn i {
+      font-size: 16px;
+    }
+
+    .nav-btn.active {
+      color: var(--accent);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(14, 14, 18, 0.9);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky Top Header -->
+  <header>
+    <div class="container header-wrap">
+      <div class="header-left">
+        <a href="index.html" class="logo">
+          <h1>Cinematique</h1>
+          <span>ARCHIVE</span>
+        </a>
+      </div>
+      <nav class="header-nav">
+        <a href="index.html" class="nav-link"><i class="fa-solid fa-list-check"></i> Watchlist</a>
+        <a href="top500.html" class="nav-link"><i class="fa-solid fa-trophy"></i> Top 500</a>
+        <a href="top250.html" class="nav-link active"><i class="fa-solid fa-star"></i> Top 250</a>
+      </nav>
+      <div class="header-right">
+        <div class="quick-stats-pill" id="nav-stats-completed">
+          <span><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Ambient Header -->
+  <div class="ambient-header">
+    <div class="container">
+      <div class="title-area">
+        <h1>IMDb Top 250</h1>
+        <span>All-Time Cinematic Canon</span>
+      </div>
+
+      <!-- Completion Progress -->
+      <div class="progress-bar-container">
+        <div class="progress-labels">
+          <span>Overall Completion</span>
+          <span id="overall-percentage">0 / 250 (0.0%)</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="overall-fill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="container">
+    <!-- Grid View Tab Content -->
+    <div id="home-view">
+      <div class="filter-panel">
+        <div class="search-box-wrap">
+          <i class="fa-solid fa-magnifying-glass search-box-icon"></i>
+          <input type="text" id="search" class="search-box" placeholder="Filter films by title, director, actors, year..." oninput="handleSearch(this.value)" />
+        </div>
+        <select id="sort-select" class="sort-dropdown" onchange="handleSort(this.value)">
+          <option value="rank">IMDb Rating Rank (1-250)</option>
+          <option value="rating">Highest Rating First</option>
+          <option value="year-desc">Release Year (Newest)</option>
+          <option value="year-asc">Release Year (Oldest)</option>
+        </select>
+      </div>
+
+      <div class="grid" id="grid">
+        <div class="loader-overlay" id="loading-spinner">
+          <div class="spinner"></div>
+          <span>Loading movies database...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Achievements Tab Content -->
+    <div id="badges-view" class="badges-view">
+      <h2 style="font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 24px; text-align: center;">Your Achievements</h2>
+      <div class="badges-grid" id="badges-container">
+        <!-- Injected Dynamically -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom navigation -->
+  <div class="bottom-nav">
+    <div class="nav-btn active" id="btn-home" onclick="switchTab('home-view')">
+      <i class="fa-solid fa-grip"></i>
+      <span>Grid View</span>
+    </div>
+    <div class="nav-btn" id="btn-badges" onclick="switchTab('badges-view')">
+      <i class="fa-solid fa-award"></i>
+      <span>Achievements (<span id="unlocked-count">0</span>/10)</span>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // Storage Keys
+    const WATCHED_KEY = "imdb_top250_watched";
+    const WATCHLIST_KEY = "imdb_watchlist_data";
+
+    // Application States
+    let movies = [];
+    let activeList = [];
+    let watchedSet = new Set();
+    let query = "";
+    let sortBy = "rank";
+
+    // Badges definitions
+    const ACHIEVEMENTS = [
+      { id: "apprentice", title: "Cinephile Novice", desc: "Watch at least 5 movies from the list.", icon: "fa-medal", type: "count", target: 5 },
+      { id: "buff", title: "Cinema Buff", desc: "Watch at least 25 movies from the list.", icon: "fa-award", type: "count", target: 25 },
+      { id: "elite", title: "Cinephile Elite", desc: "Watch at least 100 movies from the list.", icon: "fa-crown", type: "count", target: 100 },
+      { id: "conqueror", title: "IMDb Conqueror", desc: "Watch all 250 movies from the list.", icon: "fa-trophy", type: "count", target: 250 },
+      { id: "nolan", title: "Nolan Disciple", desc: "Watch 5 Christopher Nolan films.", icon: "fa-brain", type: "director", director: "Christopher Nolan", target: 5 },
+      { id: "godfather", title: "The Family", desc: "Watch both The Godfather and The Godfather Part II.", icon: "fa-handshake", type: "special_godfather", target: 2 },
+      { id: "classics", title: "Vintage Explorer", desc: "Watch 10 movies released before 1970.", icon: "fa-hourglass-half", type: "year", yearLimit: 1970, target: 10 },
+      { id: "modern", title: "Modern Masterpieces", desc: "Watch 15 movies released in 2010 or later.", icon: "fa-bolt", type: "year_modern", yearLimit: 2010, target: 15 },
+      { id: "scifi", title: "Sci-Fi Explorer", desc: "Watch 8 Sci-Fi movies.", icon: "fa-user-astronaut", type: "genre", genre: "Sci-Fi", target: 8 },
+      { id: "crime", title: "Crime Syndicate", desc: "Watch 8 Crime movies.", icon: "fa-user-secret", type: "genre", genre: "Crime", target: 8 }
+    ];
+
+    // Load application dependencies
+    window.addEventListener("DOMContentLoaded", () => {
+      loadLocalStorage();
+      loadDatabase();
+    });
+
+    function loadLocalStorage() {
+      const stored = localStorage.getItem(WATCHED_KEY);
+      if (stored) {
+        try {
+          const list = JSON.parse(stored);
+          watchedSet = new Set(list);
+        } catch(e) {}
+      }
+    }
+
+    function saveLocalStorage() {
+      localStorage.setItem(WATCHED_KEY, JSON.stringify(Array.from(watchedSet)));
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => t.classList.remove("show"), 2500);
+    }
+
+    // Load static local database
+    async function loadDatabase() {
+      try {
+        const response = await fetch('./movies-250.json');
+        if (!response.ok) throw new Error("Failed to load local JSON file");
+        const data = await response.json();
+        
+        movies = data;
+        // Assign rank numbers based on rating sort
+        movies.forEach((m, idx) => m.rank = idx + 1);
+
+        activeList = [...movies];
+        
+        // Sync with user's watchlist
+        syncFromPersonalWatchlist();
+        
+        updateProgress();
+        renderGrid();
+        renderBadges();
+        updateNavStats();
+      } catch (err) {
+        console.error("Error loading JSON database:", err);
+        document.getElementById("grid").innerHTML = `
+          <div class="loader-overlay" style="color: #ff6b6b; text-align: center;">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 32px; margin-bottom: 12px;"></i>
+            <p style="font-weight: 600;">Failed to load movies-250.json</p>
+            <p style="font-size: 13px; opacity: 0.8; margin-top: 5px;">Ensure the file is present in your server's root folder.</p>
+          </div>
+        `;
+      }
+    }
+
+    // Toggle movie watched status
+    function toggleWatched(idx) {
+      const movie = movies[idx];
+      if (!movie) return;
+
+      const titleKey = movie.name;
+
+      if (watchedSet.has(titleKey)) {
+        watchedSet.delete(titleKey);
+        updatePersonalWatchlist(movie, "want");
+        showToast(`Removed "${movie.name}" from watched list`);
+      } else {
+        watchedSet.add(titleKey);
+        updatePersonalWatchlist(movie, "watched");
+        showToast(`Marked "${movie.name}" as watched`);
+      }
+
+      saveLocalStorage();
+      updateProgress();
+      
+      // Update UI item state locally
+      const item = document.getElementById(`poster-card-${idx}`);
+      if (item) {
+        if (watchedSet.has(titleKey)) item.classList.add("watched");
+        else item.classList.remove("watched");
+      }
+
+      calculateBadgesProgress();
+      updateNavStats();
+    }
+
+    // Sync from personal movie database (index.html)
+    function syncFromPersonalWatchlist() {
+      const stored = localStorage.getItem(WATCHLIST_KEY);
+      if (!stored) return;
+      try {
+        const watchlist = JSON.parse(stored);
+        const watchedTitles = new Set(
+          watchlist
+            .filter(m => m.status === "watched")
+            .map(m => m.t.toLowerCase().trim())
+        );
+
+        let changed = false;
+        movies.forEach(m => {
+          const titleKeyNormalized = m.name.toLowerCase().trim();
+          const isWatchedInWatchlist = watchedTitles.has(titleKeyNormalized);
+          const isWatchedInTop250 = watchedSet.has(m.name);
+
+          if (isWatchedInWatchlist && !isWatchedInTop250) {
+            watchedSet.add(m.name);
+            changed = true;
+          } else if (!isWatchedInWatchlist && isWatchedInTop250) {
+            watchedSet.delete(m.name);
+            changed = true;
+          }
+        });
+
+        if (changed) {
+          saveLocalStorage();
+        }
+      } catch (e) {
+        console.error("Failed to sync from personal watchlist:", e);
+      }
+    }
+
+    // Update state in watchlist database
+    function updatePersonalWatchlist(movie, status) {
+      const stored = localStorage.getItem(WATCHLIST_KEY);
+      let watchlist = [];
+      if (stored) {
+        try { watchlist = JSON.parse(stored); } catch(e) {}
+      }
+
+      const titleKey = movie.name.toLowerCase().trim();
+      const existingIdx = watchlist.findIndex(m => m.t.toLowerCase().trim() === titleKey);
+
+      if (existingIdx >= 0) {
+        watchlist[existingIdx].status = status;
+      } else if (status === "watched") {
+        watchlist.push({
+          t: movie.name,
+          g: movie.genre.join(", ") || "Drama",
+          y: movie.year || 2010,
+          r: movie.rating || 7.0,
+          rt: 120,
+          p: movie.thumb_url || movie.image_url || "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=260&auto=format&fit=crop",
+          status: "watched"
+        });
+      }
+
+      localStorage.setItem(WATCHLIST_KEY, JSON.stringify(watchlist));
+    }
+
+    // Update Overall progress bar
+    function updateProgress() {
+      const count = watchedSet.size;
+      const pct = ((count / 250) * 100).toFixed(1);
+      
+      document.getElementById("overall-percentage").textContent = `${count} / 250 (${pct}%)`;
+      document.getElementById("overall-fill").style.width = pct + "%";
+    }
+
+    // Update unified stats pill in header
+    function updateNavStats() {
+      const count = watchedSet.size;
+      const pct = ((count / 250) * 100).toFixed(0);
+
+      // Count unlocked achievements
+      let unlockedCount = 0;
+      const watchedMovies = movies.filter(m => watchedSet.has(m.name));
+
+      ACHIEVEMENTS.forEach(badge => {
+        let current = 0;
+        if (badge.type === "count") {
+          current = watchedMovies.length;
+        } else if (badge.type === "director") {
+          current = watchedMovies.filter(m => m.directors && m.directors.some(d => d.toLowerCase().includes(badge.director.toLowerCase()))).length;
+        } else if (badge.type === "genre") {
+          current = watchedMovies.filter(m => m.genre && m.genre.some(g => g.toLowerCase().includes(badge.genre.toLowerCase()))).length;
+        } else if (badge.type === "year") {
+          current = watchedMovies.filter(m => m.year < badge.yearLimit).length;
+        } else if (badge.type === "year_modern") {
+          current = watchedMovies.filter(m => m.year >= badge.yearLimit).length;
+        } else if (badge.type === "special_godfather") {
+          current = watchedMovies.filter(m => m.name.includes("The Godfather")).length;
+        }
+        if (current >= badge.target) unlockedCount++;
+      });
+
+      const statsEl = document.getElementById("nav-stats-completed");
+      if (statsEl) {
+        statsEl.innerHTML = `<span><i class="fa-solid fa-star"></i> <strong>${count}</strong>/250 (${pct}%)</span><span>&nbsp;&bull;&nbsp;</span><span><i class="fa-solid fa-award"></i> <strong>${unlockedCount}</strong>/10 Badges</span>`;
+      }
+    }
+
+    // Render Grid Posters
+    function renderGrid() {
+      const grid = document.getElementById("grid");
+      grid.innerHTML = "";
+
+      if (activeList.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 50px 0; color: var(--text-dark);">
+            <i class="fa-solid fa-magnifying-glass-minus" style="font-size: 24px; margin-bottom: 12px;"></i>
+            <p>No films matching search filter.</p>
+          </div>
+        `;
+        return;
+      }
+
+      activeList.forEach(m => {
+        // Find original index in movies array
+        const originalIndex = movies.findIndex(x => x.name === m.name);
+
+        const card = document.createElement("div");
+        card.className = "poster" + (watchedSet.has(m.name) ? " watched" : "");
+        card.id = `poster-card-${originalIndex}`;
+        card.setAttribute("onclick", `toggleWatched(${originalIndex})`);
+        card.setAttribute("title", `${m.name} (${m.year})`);
+
+        card.innerHTML = `
+          <div class="placeholder">
+            <div class="rank">${originalIndex + 1}</div>
+            <div class="title">${m.name}</div>
+          </div>
+          <img src="${m.thumb_url || m.image_url}" alt="${m.name}" onerror="this.style.display='none'" loading="lazy" />
+        `;
+
+        grid.appendChild(card);
+      });
+    }
+
+    // Tabs toggle
+    function switchTab(viewId) {
+      document.getElementById("home-view").style.display = viewId === "home-view" ? "block" : "none";
+      document.getElementById("badges-view").style.display = viewId === "badges-view" ? "block" : "none";
+
+      document.getElementById("btn-home").classList.toggle("active", viewId === "home-view");
+      document.getElementById("btn-badges").classList.toggle("active", viewId === "badges-view");
+    }
+
+    // Render Badges
+    function renderBadges() {
+      const container = document.getElementById("badges-container");
+      container.innerHTML = "";
+
+      ACHIEVEMENTS.forEach(badge => {
+        const card = document.createElement("div");
+        card.className = "badge-card";
+        card.id = `badge-card-${badge.id}`;
+
+        card.innerHTML = `
+          <div class="badge-icon">
+            <i class="fa-solid ${badge.icon}"></i>
+          </div>
+          <div class="badge-info">
+            <div class="badge-title">${badge.title}</div>
+            <div class="badge-desc">${badge.desc}</div>
+            <div class="badge-progress-track">
+              <div class="badge-progress-fill" id="badge-fill-${badge.id}"></div>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      calculateBadgesProgress();
+    }
+
+    function calculateBadgesProgress() {
+      let unlockedCount = 0;
+      const watchedMovies = movies.filter(m => watchedSet.has(m.name));
+
+      ACHIEVEMENTS.forEach(badge => {
+        let current = 0;
+        if (badge.type === "count") {
+          current = watchedMovies.length;
+        } else if (badge.type === "director") {
+          current = watchedMovies.filter(m => m.directors && m.directors.some(d => d.toLowerCase().includes(badge.director.toLowerCase()))).length;
+        } else if (badge.type === "genre") {
+          current = watchedMovies.filter(m => m.genre && m.genre.some(g => g.toLowerCase().includes(badge.genre.toLowerCase()))).length;
+        } else if (badge.type === "year") {
+          current = watchedMovies.filter(m => m.year < badge.yearLimit).length;
+        } else if (badge.type === "year_modern") {
+          current = watchedMovies.filter(m => m.year >= badge.yearLimit).length;
+        } else if (badge.type === "special_godfather") {
+          current = watchedMovies.filter(m => m.name.includes("The Godfather")).length;
+        }
+
+        const pct = Math.min(100, (current / badge.target) * 100);
+        const fillEl = document.getElementById(`badge-fill-${badge.id}`);
+        const cardEl = document.getElementById(`badge-card-${badge.id}`);
+
+        if (fillEl) fillEl.style.width = pct + "%";
+
+        if (current >= badge.target) {
+          if (cardEl) cardEl.classList.add("unlocked");
+          unlockedCount++;
+        } else {
+          if (cardEl) cardEl.classList.remove("unlocked");
+        }
+      });
+
+      document.getElementById("unlocked-count").textContent = unlockedCount;
+    }
+
+    // Filter and Sort actions
+    function handleSearch(val) {
+      query = val.toLowerCase().trim();
+      filterAndSort();
+    }
+
+    function handleSort(val) {
+      sortBy = val;
+      filterAndSort();
+    }
+
+    function filterAndSort() {
+      activeList = movies.filter(m => {
+        return !query || 
+          m.name.toLowerCase().includes(query) ||
+          (m.directors && m.directors.some(d => d.toLowerCase().includes(query))) ||
+          (m.actors && m.actors.some(a => a.toLowerCase().includes(query))) ||
+          (m.genre && m.genre.some(g => g.toLowerCase().includes(query))) ||
+          m.year.toString().includes(query);
+      });
+
+      if (sortBy === 'rank') {
+        activeList.sort((a,b) => a.rank - b.rank);
+      } else if (sortBy === 'rating') {
+        activeList.sort((a,b) => b.rating - a.rating || a.rank - b.rank);
+      } else if (sortBy === 'year-desc') {
+        activeList.sort((a,b) => b.year - a.year || a.rank - b.rank);
+      } else if (sortBy === 'year-asc') {
+        activeList.sort((a,b) => a.year - b.year || a.rank - b.rank);
+      }
+
+      renderGrid();
+    }
+
+    // Cross-tab sync event
+    window.addEventListener("storage", (e) => {
+      if (e.key === WATCHLIST_KEY || e.key === WATCHED_KEY) {
+        loadLocalStorage();
+        if (movies.length > 0) {
+          syncFromPersonalWatchlist();
+          updateProgress();
+          filterAndSort();
+          calculateBadgesProgress();
+          updateNavStats();
+        }
+      }
+    });
+  </script>
+</body>
+</html>

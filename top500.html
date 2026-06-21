@@ -23,6 +23,7 @@
       --text: #f3f4f6;
       --text-dim: #9ca3af;
       --text-dark: #555866;
+      --glass: rgba(15, 15, 19, 0.75);
       --font-display: 'Playfair Display', Georgia, serif;
       --font-body: 'Outfit', sans-serif;
     }
@@ -39,6 +40,120 @@
       font-family: var(--font-body);
       line-height: 1.4;
       overflow-x: hidden;
+    }
+
+    /* Header styling */
+    header {
+      position: sticky;
+      top: 0;
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+      padding: 14px 0;
+    }
+
+    .header-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo h1 {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .logo span {
+      background: var(--accent);
+      color: #000;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-body);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .nav-link {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .nav-link.active {
+      color: var(--accent);
+      background: rgba(245, 197, 24, 0.08);
+      font-weight: 600;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+    }
+
+    .quick-stats-pill {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .quick-stats-pill span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    @media (max-width: 600px) {
+      .header-wrap {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .header-nav {
+        gap: 12px;
+      }
     }
 
     .container {
@@ -472,6 +587,27 @@
 </head>
 <body>
 
+  <header>
+    <div class="container header-wrap">
+      <div class="header-left">
+        <a href="index.html" class="logo">
+          <h1>Cinematique</h1>
+          <span>ARCHIVE</span>
+        </a>
+      </div>
+      <nav class="header-nav">
+        <a href="index.html" class="nav-link"><i class="fa-solid fa-list-check"></i> Watchlist</a>
+        <a href="top500.html" class="nav-link active"><i class="fa-solid fa-trophy"></i> Top 500</a>
+        <a href="top250.html" class="nav-link"><i class="fa-solid fa-star"></i> Top 250</a>
+      </nav>
+      <div class="header-right">
+        <div class="quick-stats-pill" id="nav-stats-completed">
+          <span><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
   <!-- Header -->
   <div class="ambient-header">
     <div class="container">
@@ -677,17 +813,26 @@
 
       activeList = [...movies];
       
+      // Sync with user's personal watchlist from index.html
+      syncFromPersonalWatchlist();
+      
       updateProgress();
       renderMoviesList();
       renderBadges();
+      updateNavStats();
     }
 
-    // Toggle watched state
+    // Toggle watched state and sync to index.html's database
     function toggleWatched(rank) {
+      const movie = movies.find(m => m.rank === rank);
+      if (!movie) return;
+
       if (watchedSet.has(rank)) {
         watchedSet.delete(rank);
+        updatePersonalWatchlist(movie, "want");
       } else {
         watchedSet.add(rank);
+        updatePersonalWatchlist(movie, "watched");
       }
       saveLocalStorage();
       updateProgress();
@@ -701,7 +846,118 @@
 
       // Update badges calculations
       calculateBadgesProgress();
+      updateNavStats();
     }
+
+    // Sync state from index.html personal watchlist to Top 500 watched list
+    function syncFromPersonalWatchlist() {
+      const stored = localStorage.getItem("imdb_watchlist_data");
+      if (!stored) return;
+      try {
+        const watchlist = JSON.parse(stored);
+        const watchedTitles = new Set(
+          watchlist
+            .filter(m => m.status === "watched")
+            .map(m => m.t.toLowerCase().trim())
+        );
+        
+        let changed = false;
+        movies.forEach(m => {
+          const titleKey = m.title.toLowerCase().trim();
+          const isWatchedInWatchlist = watchedTitles.has(titleKey);
+          const isWatchedInTop500 = watchedSet.has(m.rank);
+          
+          if (isWatchedInWatchlist && !isWatchedInTop500) {
+            watchedSet.add(m.rank);
+            changed = true;
+          } else if (!isWatchedInWatchlist && isWatchedInTop500) {
+            watchedSet.delete(m.rank);
+            changed = true;
+          }
+        });
+        
+        if (changed) {
+          saveLocalStorage();
+        }
+      } catch (e) {
+        console.error("Failed to sync from personal watchlist:", e);
+      }
+    }
+
+    // Add or update status in index.html's database
+    function updatePersonalWatchlist(movie, status) {
+      const stored = localStorage.getItem("imdb_watchlist_data");
+      let watchlist = [];
+      if (stored) {
+        try { watchlist = JSON.parse(stored); } catch(e) {}
+      }
+      
+      const titleKey = movie.title.toLowerCase().trim();
+      const existingIdx = watchlist.findIndex(m => m.t.toLowerCase().trim() === titleKey);
+      
+      if (existingIdx >= 0) {
+        watchlist[existingIdx].status = status;
+      } else if (status === "watched") {
+        // Add new movie from Top 500 metadata
+        watchlist.push({
+          t: movie.title,
+          g: movie.genre || "Drama",
+          y: movie.year || 2010,
+          r: movie.rating || 7.0,
+          rt: movie.runtime || 120,
+          p: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=260&auto=format&fit=crop",
+          status: "watched"
+        });
+      }
+      
+      localStorage.setItem("imdb_watchlist_data", JSON.stringify(watchlist));
+    }
+
+    // Update dynamic navigation stats at the top of the page
+    function updateNavStats() {
+      const count = watchedSet.size;
+      const pct = ((count / 500) * 100).toFixed(0);
+      
+      // Calculate unlocked badges
+      const watchedMovies = movies.filter(m => watchedSet.has(m.rank));
+      let unlockedCount = 0;
+      ACHIEVEMENTS.forEach(badge => {
+        let current = 0;
+        if (badge.type === "count") {
+          current = watchedMovies.length;
+        } else if (badge.type === "genre") {
+          current = watchedMovies.filter(m => m.genre && m.genre.includes(badge.genre)).length;
+        } else if (badge.type === "director") {
+          current = watchedMovies.filter(m => m.director && m.director.toLowerCase() === badge.director.toLowerCase()).length;
+        } else if (badge.type === "year") {
+          current = watchedMovies.filter(m => m.year < badge.yearLimit).length;
+        } else if (badge.type === "votes") {
+          current = watchedMovies.filter(m => m.votes > badge.votesLimit).length;
+        }
+        if (current >= badge.target) {
+          unlockedCount++;
+        }
+      });
+
+      const statsEl = document.getElementById("nav-stats-completed");
+      if (statsEl) {
+        statsEl.innerHTML = `<span><i class="fa-solid fa-film"></i> <strong>${count}</strong>/500 (${pct}%)</span><span>&nbsp;&bull;&nbsp;</span><span><i class="fa-solid fa-trophy"></i> <strong>${unlockedCount}</strong>/9 Badges</span>`;
+      }
+    }
+
+    // Storage event listener to keep multiple open tabs synced
+    window.addEventListener("storage", (e) => {
+      if (e.key === "imdb_watchlist_data" || e.key === STORAGE_KEY) {
+        loadLocalStorage();
+        if (movies.length > 0) {
+          syncFromPersonalWatchlist();
+          updateProgress();
+          filterAndSort();
+          calculateBadgesProgress();
+          updateNavStats();
+        }
+      }
+    });
 
     // Update Global completion bar
     function updateProgress() {
