@@ -1,32 +1,31 @@
-# IMDb Watchlist & Achievements Tracker
+# IMDb Top 250 Achievements & Poster Tracker
 
-A collection of web utilities for cataloging your movie list and tracking completion of the IMDb Top 250 list, styled with a minimal black-and-white Criterion Collection aesthetic.
+A single-page web utility for tracking your watch completion of the IMDb Top 250 all-time movies, styled with a minimal, high-contrast black-and-white Criterion Collection aesthetic.
 
-## Deployed Live Apps
+## Deployed Live App
 
-- 📊 **[IMDb Watchlist Manager](https://suz41.github.io/imdb-watchlist/)**
-- 🏆 **[IMDb Top 250 Achievements Tracker](https://suz41.github.io/imdb-watchlist/top250.html)**
+- 🏆 **[IMDb Top 250 Achievements & Poster Tracker](https://suz41.github.io/imdb-watchlist/)**
 
 ## Features
 
-### 1. Watchlist Manager (`index.html`)
-* Personal movie logger with local storage persistence.
-* Comprehensive statistics tracker (runtime, genre distribution, count).
-* Autocomplete movie suggestions.
+### 1. Interactive 5-Column Grid
+* Renders the 250 greatest movies of all time sorted by rank, rating, or release year.
+* Custom, minimal rank badges (`1` to `250`) overlaid on top of loaded poster art.
+* Fully responsive layout (5 columns on desktop/tablets, scaling to 3 columns on mobile viewports).
 
-### 2. Top 250 Achievements Tracker (`top250.html`)
-* Interactive 5-column grid showing all 250 movies sorted by rank, rating, and release date, with movie numbers overlaid.
-* **10 Unlockable Achievements**: Director collections (e.g. Nolan, Coppola), decade milestones, genre badges, and volume achievements.
-* **High Performance Poster Loading System**:
-  * **Robust Fallback Search**: Uses an adaptive fallback search algorithm on TMDB API. If year-constrained search fails to yield results, it falls back to a clean title-based query, ensuring 100% poster matching.
-  * **Instant Image Delivery**: Attempts to load high-efficiency CDN thumbnails initially, displaying a clean text card overlay with movie rank numbers on failure.
-  * **Prioritized Viewport Fetching**: Utilizes an `IntersectionObserver` to track which posters are coming into view and shifts their TMDB fetching tasks to the front of the queue.
-  * **Failure Caching**: Caches verified failed API queries as `"failed"` in LocalStorage, preventing redundant subsequent queries.
-  * **Visual Polish**: Includes smooth CSS image fade-ins (`opacity 0.4s`) and interactive poster zoom effects on hover.
-* **Bidirectional Watchlist Sync**: Real-time two-way synchronization between your personal watchlist (`index.html`) and the Top 250 checklist.
+### 2. Gamified Achievements
+* **10 Unlockable Milestones**: Track director collections (e.g. Nolan, Coppola), release decades, genre focus, and total count badges.
+* Real-time progress bar updating your overall completion percentage.
 
-### 3. Premium Minimal Aesthetic
-* Designed with Outfit and Playfair Display typography, responsive glassmorphic cards, and a strictly minimal dark black-and-white theme.
+### 3. High Performance Poster Loader
+* **Flexible TMDB API Integration**: Queries the TMDB search API using your configured key. If year-constrained filtering returns no results, the system automatically falls back to a clean title search, guaranteeing a verified poster match.
+* **Instant Fallbacks**: Attempts to load high-efficiency CDN thumbnails initially, displaying a clean text card on load failure.
+* **Prioritized Viewport Fetching**: Utilizes `IntersectionObserver` to track which poster cards are visible on screen, moving their API fetching tasks to the front of the queue.
+* **Fail-Safe Caching**: Safely caches retrieved posters in LocalStorage. Network errors or invalid API key status codes will not poison the cache, ensuring the system only marks a movie search as "failed" when a query successfully completes with zero results.
+* **Visual Polish**: Smooth image fade-ins (`opacity 0.4s`) and interactive card scale zoom animations on hover.
+
+### 4. Premium Minimal Theme
+* Designed with Outfit and Playfair Display typography, responsive glassmorphic cards, and a dark, strictly grayscale palette.
 
 ## Local Running
 
