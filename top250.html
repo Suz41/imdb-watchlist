@@ -685,6 +685,57 @@
     const WATCHED_KEY = "imdb_top250_watched";
     const WATCHLIST_KEY = "imdb_watchlist_data";
 
+    // Hardcoded TMDB API Key from user configuration
+    const API_KEY = "8196a17676681ce722aaab7098785c6b";
+
+    // Initial set of posters to avoid instantly exhausting the API on first load
+    const BASE_POSTERS = {
+      "The Shawshank Redemption": "https://image.tmdb.org/t/p/w342/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg",
+      "The Godfather": "https://image.tmdb.org/t/p/w342/3bhkrj58Vtu7enYsRolD1fZdja1.jpg",
+      "The Dark Knight": "https://image.tmdb.org/t/p/w342/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+      "The Godfather: Part II": "https://image.tmdb.org/t/p/w342/hek3koDUyRQk7IFIrvGffvZAflb.jpg",
+      "12 Angry Men": "https://image.tmdb.org/t/p/w342/ow3wq89wM8qd5X7hWKxiRfsFf9C.jpg",
+      "Schindler's List": "https://image.tmdb.org/t/p/w342/sF1U4EUQS8YHUYjNl3pMGNIQyr0.jpg",
+      "The Lord of the Rings: The Return of the King": "https://image.tmdb.org/t/p/w342/rCzpDGLbOoPwLjy3OAm5NUPOTrC.jpg",
+      "Pulp Fiction": "https://image.tmdb.org/t/p/w342/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg",
+      "The Lord of the Rings: The Fellowship of the Ring": "https://image.tmdb.org/t/p/w342/6oom5QYQ2yQTMJIbnvbkBL9cHo6.jpg",
+      "The Good, the Bad and the Ugly": "https://image.tmdb.org/t/p/w342/bX2xnavhMYjWDoZp1VM6VnU1xwe.jpg",
+      "Forrest Gump": "https://image.tmdb.org/t/p/w342/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg",
+      "Fight Club": "https://image.tmdb.org/t/p/w342/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
+      "The Lord of the Rings: The Two Towers": "https://image.tmdb.org/t/p/w342/5VTN0pR8gcqV3EPUHHfMGnJYN9L.jpg",
+      "Inception": "https://image.tmdb.org/t/p/w342/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
+      "Star Wars: Episode V - The Empire Strikes Back": "https://image.tmdb.org/t/p/w342/7BuH8itoSrLExs2GIrU0WdNO34O.jpg",
+      "The Matrix": "https://image.tmdb.org/t/p/w342/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
+      "Goodfellas": "https://image.tmdb.org/t/p/w342/aKuFiU82s5ISJpGZp7YkIr3kCUd.jpg",
+      "One Flew Over the Cuckoo's Nest": "https://image.tmdb.org/t/p/w342/3jcbjz1L1nC2rY6u8ZntO3vO12G.jpg",
+      "Seven": "https://image.tmdb.org/t/p/w342/6yoghtyTpznpBik8EngEmJskVPh.jpg",
+      "Seven Samurai": "https://image.tmdb.org/t/p/w342/8OKm7HD26zG775yG5Qy6b7617d5.jpg"
+    };
+
+    // Load Custom Cached Posters from LocalStorage
+    let apiPosters = {};
+    try {
+      const saved = localStorage.getItem('imdb_api_posters_v2');
+      if (saved) apiPosters = JSON.parse(saved);
+    } catch(e) {}
+
+    function getBasePoster(title) {
+      const t = title.toLowerCase().trim();
+      if (t === "il buono, il brutto, il cattivo" || t === "the good, the bad and the ugly") {
+        return BASE_POSTERS["The Good, the Bad and the Ugly"];
+      }
+      if (t === "shichinin no samurai" || t === "seven samurai") {
+        return BASE_POSTERS["Seven Samurai"];
+      }
+      if (t === "se7en" || t === "seven") {
+        return BASE_POSTERS["Seven"];
+      }
+      if (t === "the godfather part ii" || t === "the godfather: part ii") {
+        return BASE_POSTERS["The Godfather: Part II"];
+      }
+      return BASE_POSTERS[title];
+    }
+
     // Application States
     let movies = [];
     let activeList = [];
@@ -697,7 +748,7 @@
       { id: "apprentice", title: "Cinephile Novice", desc: "Watch at least 5 movies from the list.", icon: "fa-medal", type: "count", target: 5 },
       { id: "buff", title: "Cinema Buff", desc: "Watch at least 25 movies from the list.", icon: "fa-award", type: "count", target: 25 },
       { id: "elite", title: "Cinephile Elite", desc: "Watch at least 100 movies from the list.", icon: "fa-crown", type: "count", target: 100 },
-      { id: "conqueror", title: "IMDb Conqueror", desc: "Watch all 250 movies from the list.", icon: "fa-trophy", type: "count", target: 250 },
+      { id: "conqueror", title: "IMDb Master", desc: "Watch all 250 movies from the list.", icon: "fa-trophy", type: "count", target: 250 },
       { id: "nolan", title: "Nolan Disciple", desc: "Watch 5 Christopher Nolan films.", icon: "fa-brain", type: "director", director: "Christopher Nolan", target: 5 },
       { id: "godfather", title: "The Family", desc: "Watch both The Godfather and The Godfather Part II.", icon: "fa-handshake", type: "special_godfather", target: 2 },
       { id: "classics", title: "Vintage Explorer", desc: "Watch 10 movies released before 1970.", icon: "fa-hourglass-half", type: "year", yearLimit: 1970, target: 10 },
@@ -754,6 +805,9 @@
         renderGrid();
         renderBadges();
         updateNavStats();
+
+        // Dynamically start fetching missing TMDB poster art in background
+        backgroundFetchMissingPosters();
       } catch (err) {
         console.error("Error loading JSON database:", err);
         document.getElementById("grid").innerHTML = `
@@ -763,6 +817,48 @@
             <p style="font-size: 13px; opacity: 0.8; margin-top: 5px;">Ensure the file is present in your server's root folder.</p>
           </div>
         `;
+      }
+    }
+
+    // Background fetch TMDB posters that are not cached yet
+    async function backgroundFetchMissingPosters() {
+      const missing = movies.filter(m => !apiPosters[m.name] && !getBasePoster(m.name));
+      if (missing.length === 0) return;
+
+      for (const movie of missing) {
+        try {
+          const title = movie.name;
+          const year = movie.year;
+          const url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(title)}&primary_release_year=${year}`;
+          
+          const res = await fetch(url);
+          if (res.status === 429) {
+            await new Promise(r => setTimeout(r, 6000));
+            continue;
+          }
+          if (!res.ok) continue;
+          
+          const data = await res.json();
+          if (data.results && data.results.length > 0 && data.results[0].poster_path) {
+            const path = `https://image.tmdb.org/t/p/w342${data.results[0].poster_path}`;
+            apiPosters[title] = path;
+            localStorage.setItem('imdb_api_posters_v2', JSON.stringify(apiPosters));
+            
+            // Dynamically update image source if displayed on current view
+            const idx = movies.findIndex(x => x.name === title);
+            if (idx >= 0) {
+              const img = document.querySelector(`#poster-card-${idx} img`);
+              if (img) {
+                img.src = path;
+                img.style.display = 'block';
+              }
+            }
+          }
+        } catch(e) {
+          console.error("Error background fetching TMDB poster:", e);
+        }
+        // Polite delay to avoid API block (1.5 seconds)
+        await new Promise(r => setTimeout(r, 1500));
       }
     }
 
@@ -846,13 +942,16 @@
       if (existingIdx >= 0) {
         watchlist[existingIdx].status = status;
       } else if (status === "watched") {
+        const tmdbPoster = apiPosters[movie.name] || getBasePoster(movie.name);
+        const posterUrl = tmdbPoster || movie.thumb_url || movie.image_url || "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=260&auto=format&fit=crop";
+
         watchlist.push({
           t: movie.name,
           g: movie.genre.join(", ") || "Drama",
           y: movie.year || 2010,
           r: movie.rating || 7.0,
           rt: 120,
-          p: movie.thumb_url || movie.image_url || "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=260&auto=format&fit=crop",
+          p: posterUrl,
           status: "watched"
         });
       }
@@ -918,8 +1017,9 @@
       }
 
       activeList.forEach(m => {
-        // Find original index in movies array
         const originalIndex = movies.findIndex(x => x.name === m.name);
+        const tmdbPoster = apiPosters[m.name] || getBasePoster(m.name);
+        const posterUrl = tmdbPoster || m.thumb_url || m.image_url;
 
         const card = document.createElement("div");
         card.className = "poster" + (watchedSet.has(m.name) ? " watched" : "");
@@ -932,7 +1032,7 @@
             <div class="rank">${originalIndex + 1}</div>
             <div class="title">${m.name}</div>
           </div>
-          <img src="${m.thumb_url || m.image_url}" alt="${m.name}" onerror="this.style.display='none'" loading="lazy" />
+          <img src="${posterUrl}" alt="${m.name}" onerror="this.style.display='none'" loading="lazy" />
         `;
 
         grid.appendChild(card);
@@ -1020,6 +1120,7 @@
       filterAndSort();
     }
 
+    // Sort Handler
     function handleSort(val) {
       sortBy = val;
       filterAndSort();
