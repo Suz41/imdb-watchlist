@@ -46,119 +46,7 @@
       padding-bottom: 80px; /* Space for bottom nav on mobile */
     }
 
-    /* Header styling */
-    header {
-      position: sticky;
-      top: 0;
-      background: var(--glass);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      z-index: 100;
-      padding: 14px 0;
-    }
 
-    .header-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: var(--text);
-    }
-
-    .logo h1 {
-      font-family: var(--font-display);
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-
-    .logo span {
-      background: var(--accent);
-      color: #000;
-      font-size: 10px;
-      font-weight: 800;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: var(--font-body);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .header-nav {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .nav-link {
-      color: var(--text-dim);
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 12px;
-      border-radius: 6px;
-      transition: all 0.2s ease;
-    }
-
-    .nav-link:hover {
-      color: #fff;
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .nav-link.active {
-      color: var(--accent);
-      background: rgba(255, 255, 255, 0.08);
-      font-weight: 600;
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-    }
-
-    .quick-stats-pill {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 12px;
-      color: var(--text-dim);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .quick-stats-pill span {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    @media (max-width: 600px) {
-      .header-wrap {
-        flex-direction: column;
-        gap: 12px;
-      }
-      .header-nav {
-        gap: 12px;
-      }
-    }
 
     .container {
       max-width: 1200px;
@@ -552,23 +440,7 @@
 </head>
 <body>
 
-  <!-- Sticky Top Header -->
-  <header>
-    <div class="container header-wrap">
-      <div class="header-left">
-        <a href="index.html" class="logo">
-          <h1>Cinematique</h1>
-          <span>ARCHIVE</span>
-        </a>
-      </div>
 
-      <div class="header-right">
-        <div class="quick-stats-pill" id="nav-stats-completed">
-          <span><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</span>
-        </div>
-      </div>
-    </div>
-  </header>
 
   <!-- Ambient Header -->
   <div class="ambient-header">
@@ -662,13 +534,12 @@
     ];
 
     // DOM cache
-    let grid, badgeList, watchedCountEl, barEl, viewHome, viewBadges, btnHome, btnBadges;
+    let grid, badgeList, barEl, viewHome, viewBadges, btnHome, btnBadges;
 
     // Initialize application on DOM load
     window.addEventListener("DOMContentLoaded", () => {
       grid = document.getElementById("grid");
       badgeList = document.getElementById("badge-list");
-      watchedCountEl = document.getElementById("watched-count") || {textContent: ''};
       barEl = document.getElementById("overall-fill");
       viewHome = document.getElementById("home-view");
       viewBadges = document.getElementById("badges-view");
@@ -929,47 +800,11 @@
 
     function updateStats() {
       const count = watchedSet.size;
-      if(watchedCountEl) watchedCountEl.textContent = count;
-      
       const pct = ((count / 250) * 100).toFixed(1);
       document.getElementById("overall-percentage").textContent = `${count} / 250 (${pct}%)`;
       if(barEl) barEl.style.width = pct + "%";
 
       renderBadges();
-      updateNavStats();
-    }
-
-    // Update unified stats pill in header
-    function updateNavStats() {
-      const count = watchedSet.size;
-      const pct = ((count / 250) * 100).toFixed(0);
-
-      // Count unlocked achievements
-      let unlockedCount = 0;
-      const watchedMovies = movies.filter(m => watchedSet.has(m.id));
-
-      ACHIEVEMENTS.forEach(badge => {
-        let current = 0;
-        if (badge.type === "count") {
-          current = watchedMovies.length;
-        } else if (badge.type === "director") {
-          current = watchedMovies.filter(m => m.directors && m.directors.some(d => d.toLowerCase().includes(badge.director.toLowerCase()))).length;
-        } else if (badge.type === "genre") {
-          current = watchedMovies.filter(m => m.genre && m.genre.some(g => g.toLowerCase().includes(badge.genre.toLowerCase()))).length;
-        } else if (badge.type === "year") {
-          current = watchedMovies.filter(m => m.year < badge.yearLimit).length;
-        } else if (badge.type === "year_modern") {
-          current = watchedMovies.filter(m => m.year >= badge.yearLimit).length;
-        } else if (badge.type === "special_godfather") {
-          current = watchedMovies.filter(m => m.name.includes("The Godfather")).length;
-        }
-        if (current >= badge.target) unlockedCount++;
-      });
-
-      const statsEl = document.getElementById("nav-stats-completed");
-      if (statsEl) {
-        statsEl.innerHTML = `<span><i class="fa-solid fa-star"></i> <strong>${count}</strong>/250 (${pct}%)</span><span>&nbsp;&bull;&nbsp;</span><span><i class="fa-solid fa-award"></i> <strong>${unlockedCount}</strong>/10 Badges</span>`;
-      }
     }
 
     // Render Grid Posters
