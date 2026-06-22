@@ -1166,7 +1166,10 @@
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed.date === dateStr) {
-            dailyPick = movies.find(m => m.id === parsed.id);
+            const found = movies.find(m => m.id === parsed.id);
+            if (found && !watchedSet.has(found.id)) {
+              dailyPick = found;
+            }
           }
         }
       } catch(e) {}
