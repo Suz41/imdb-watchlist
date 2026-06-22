@@ -99,120 +99,143 @@
 
 
 
-    /* Grid Layout for posters */
+    /* List Layout for movies */
     .grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
       padding: 10px 0 50px;
+      max-width: 800px;
+      margin: 0 auto;
     }
 
-    @media (max-width: 768px) {
-      .grid {
-        grid-template-columns: repeat(5, 1fr);
-        gap: 8px;
-      }
-    }
-
-    .poster {
-      position: relative;
-      aspect-ratio: 2/3;
+    .movie-row {
+      display: flex;
+      align-items: center;
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: 8px;
+      padding: 12px 16px;
+      gap: 16px;
       cursor: pointer;
-      overflow: hidden;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.2s ease;
+      position: relative;
+      user-select: none;
     }
 
-    .poster:hover {
-      transform: translateY(-4px) scale(1.03);
+    .movie-row:hover {
       border-color: var(--border-hover);
-      box-shadow: 0 8px 20px rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.02);
     }
 
-    .poster img {
+    .movie-rank {
+      font-family: var(--font-body);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent-copper);
+      width: 32px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .movie-poster-container {
+      width: 48px;
+      height: 72px;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #16161f;
+      position: relative;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .movie-poster-container img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: opacity 0.4s ease, transform 0.4s ease;
-      position: absolute;
-      inset: 0;
-      z-index: 1;
+      transition: opacity 0.3s ease;
       opacity: 0;
     }
 
-    .poster:hover img {
-      transform: scale(1.05);
+    .movie-poster-container img.loaded {
+      opacity: 1;
     }
 
-    .placeholder {
+    .placeholder-poster {
       position: absolute;
       inset: 0;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 12px;
-      text-align: center;
+      color: var(--text-dark);
+      font-size: 18px;
       background: linear-gradient(135deg, #16161f 0%, #0e0e12 100%);
-      z-index: 0;
     }
 
-    .placeholder .rank {
-      font-family: var(--font-display);
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--accent-copper);
-      line-height: 1;
+    .movie-details {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
-    .placeholder .title {
-      font-size: 11px;
+    .movie-title-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .movie-title {
+      font-weight: 600;
+      font-size: 15px;
+      color: #fff;
+    }
+
+    .movie-year {
+      font-size: 12px;
       color: var(--text-dim);
-      margin-top: 6px;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      line-height: 1.3;
-      font-weight: 500;
     }
 
-    /* Watched state */
-    .poster.watched img {
-      filter: grayscale(100%) contrast(0.8);
-      opacity: 0.22;
+    .movie-meta {
+      font-size: 12px;
+      color: var(--text-dark);
     }
 
-    .poster.watched .placeholder {
-      opacity: 0.35;
-    }
-
-    .poster.watched::after {
-      content: "\f00c";
-      font-family: "Font Awesome 6 Free";
-      font-weight: 900;
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      width: 22px;
-      height: 22px;
-      background: var(--accent);
-      color: #000;
-      border-radius: 50%;
+    .movie-status {
+      font-size: 18px;
+      color: var(--text-dark);
+      transition: color 0.2s ease;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 11px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-      z-index: 2;
-      animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
     }
 
-    @keyframes popIn {
-      0% { transform: scale(0); }
-      100% { transform: scale(1); }
+    /* Watched State in List Layout */
+    .movie-row.watched {
+      background: rgba(255, 255, 255, 0.01);
+      border-color: rgba(255, 255, 255, 0.04);
+    }
+
+    .movie-row.watched .movie-rank,
+    .movie-row.watched .movie-title,
+    .movie-row.watched .movie-year,
+    .movie-row.watched .movie-meta {
+      color: var(--text-dark) !important;
+    }
+
+    .movie-row.watched .movie-poster-container img {
+      filter: grayscale(100%) contrast(0.8);
+      opacity: 0.15 !important;
+    }
+
+    .movie-row.watched .movie-status {
+      color: var(--accent);
     }
 
     /* Achievements Grid */
@@ -717,27 +740,26 @@
           localStorage.setItem('imdb_api_posters_v2', JSON.stringify(apiPosters));
           
           // Dynamically swap the image inside the card if visible on screen
-          const card = document.querySelector(`.poster[data-id="${movie.id}"]`);
+          const card = document.querySelector(`.movie-row[data-id="${movie.id}"]`);
           if (card) {
-            card.innerHTML = "";
-            const img = document.createElement("img");
-            img.alt = movie.title;
-            img.setAttribute("loading", "lazy");
-            img.style.opacity = 0;
-            img.addEventListener("load", () => {
-              img.style.opacity = 1;
-            });
-            img.addEventListener("error", () => {
-              handleImageError(img, movie);
-            });
-            img.src = posterUrl;
-            card.appendChild(img);
-
-            // Add rank badge for visual check on image overlay
-            const rankBadge = document.createElement("div");
-            rankBadge.className = "rank-badge";
-            rankBadge.textContent = movie.rank;
-            card.appendChild(rankBadge);
+            const img = card.querySelector(".movie-poster");
+            const placeholder = card.querySelector(".placeholder-poster");
+            if (img && placeholder) {
+              img.src = posterUrl;
+              img.style.display = "block";
+              if (img.complete) {
+                img.classList.add("loaded");
+                placeholder.style.display = "none";
+              } else {
+                img.addEventListener("load", () => {
+                  img.classList.add("loaded");
+                  placeholder.style.display = "none";
+                });
+                img.addEventListener("error", () => {
+                  handleImageError(img, movie);
+                });
+              }
+            }
           }
         } else {
           // If TMDB returns no results, store "failed" in cache to skip in future
@@ -800,37 +822,48 @@
       list.forEach(movie => {
         const isWatched = watchedSet.has(movie.id);
         const card = document.createElement("div");
-        card.className = "poster" + (isWatched ? " watched" : "");
+        card.className = "movie-row" + (isWatched ? " watched" : "");
         card.dataset.id = movie.id;
-        card.setAttribute("title", `${movie.name} (${movie.year})`);
 
-        if (movie.poster) {
-          const img = document.createElement("img");
-          img.alt = movie.title;
-          img.setAttribute("loading", "lazy");
-          img.style.opacity = 0;
-          img.addEventListener("load", () => {
-            img.style.opacity = 1;
-          });
-          img.addEventListener("error", () => {
-            handleImageError(img, movie);
-          });
-          img.src = movie.poster;
-          card.appendChild(img);
+        // Render the inner HTML in list format: posters, movie name, rank, director, year
+        card.innerHTML = `
+          <div class="movie-rank">${movie.rank}</div>
+          <div class="movie-poster-container">
+            <img class="movie-poster" alt="${movie.title}" src="${movie.poster || ''}" style="${movie.poster ? '' : 'display: none;'}" />
+            <div class="placeholder-poster" style="${movie.poster ? 'display: none;' : ''}">
+              <i class="fa-solid fa-film"></i>
+            </div>
+          </div>
+          <div class="movie-details">
+            <div class="movie-title-row">
+              <span class="movie-title">${movie.name}</span>
+              <span class="movie-year">(${movie.year})</span>
+            </div>
+            <div class="movie-meta">
+              <span class="movie-director">Dir: ${movie.directors ? movie.directors.join(', ') : 'Unknown'}</span>
+            </div>
+          </div>
+          <div class="movie-status">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+        `;
 
-          // Add rank badge for visual check on image overlay
-          const rankBadge = document.createElement("div");
-          rankBadge.className = "rank-badge";
-          rankBadge.textContent = movie.rank;
-          card.appendChild(rankBadge);
-        } else {
-          const placeholder = document.createElement("div");
-          placeholder.className = "placeholder";
-          placeholder.innerHTML = `
-            <div class="rank">${movie.rank}</div>
-            <div class="title">${movie.name}</div>
-          `;
-          card.appendChild(placeholder);
+        // Handle image load event for lazy fade-in
+        const img = card.querySelector(".movie-poster");
+        const placeholder = card.querySelector(".placeholder-poster");
+        if (movie.poster && img && placeholder) {
+          if (img.complete) {
+            img.classList.add("loaded");
+            placeholder.style.display = "none";
+          } else {
+            img.addEventListener("load", () => {
+              img.classList.add("loaded");
+              placeholder.style.display = "none";
+            });
+            img.addEventListener("error", () => {
+              handleImageError(img, movie);
+            });
+          }
         }
 
         card.onclick = () => toggleWatched(movie.id, card);
@@ -844,16 +877,15 @@
 
     // Handles fallback when an image URL fails to load
     function handleImageError(imgElement, movie) {
-      const card = imgElement.parentElement;
-      if (card) {
-        card.innerHTML = `
-          <div class="placeholder">
-            <div class="rank">${movie.rank}</div>
-            <div class="title">${movie.name}</div>
-          </div>
-        `;
+      imgElement.style.display = "none";
+      imgElement.classList.remove("loaded");
+      const container = imgElement.parentElement;
+      if (container) {
+        const placeholder = container.querySelector(".placeholder-poster");
+        if (placeholder) {
+          placeholder.style.display = "flex";
+        }
       }
-      // If we haven't successfully fetched TMDB yet, prioritize it!
       if (needsTmdbFetch(movie)) {
         prioritizeMovie(movie);
       }
