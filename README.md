@@ -9,9 +9,9 @@ A single-page web utility for tracking your watch completion of the IMDb Top 250
 ## Features
 
 ### 1. Interactive 5-Column Grid
-* Renders the 250 greatest movies of all time sorted by rank, rating, or release year.
+* Renders the 250 greatest movies of all time in their canonical IMDb ranking order.
 * Custom, minimal rank badges (`1` to `250`) overlaid on top of loaded poster art.
-* Fully responsive layout (5 columns on desktop/tablets, scaling to 3 columns on mobile viewports).
+* Enforced 5-column layout across all viewports (desktop, tablet, and mobile).
 
 ### 2. Gamified Achievements
 * **10 Unlockable Milestones**: Track director collections (e.g. Nolan, Coppola), release decades, genre focus, and total count badges.
@@ -19,7 +19,7 @@ A single-page web utility for tracking your watch completion of the IMDb Top 250
 
 ### 3. High Performance Poster Loader
 * **Flexible TMDB API Integration**: Queries the TMDB search API using your configured key. If year-constrained filtering returns no results, the system automatically falls back to a clean title search, guaranteeing a verified poster match.
-* **Instant Fallbacks**: Attempts to load high-efficiency CDN thumbnails initially, displaying a clean text card on load failure.
+* **Instant Fallbacks**: Displays a clean text card on load failure.
 * **Prioritized Viewport Fetching**: Utilizes `IntersectionObserver` to track which poster cards are visible on screen, moving their API fetching tasks to the front of the queue.
 * **Fail-Safe Caching**: Safely caches retrieved posters in LocalStorage. Network errors or invalid API key status codes will not poison the cache, ensuring the system only marks a movie search as "failed" when a query successfully completes with zero results.
 * **Visual Polish**: Smooth image fade-ins (`opacity 0.4s`) and interactive card scale zoom animations on hover.
