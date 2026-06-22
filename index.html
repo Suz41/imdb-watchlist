@@ -232,66 +232,7 @@
       transition: width 0.5s ease;
     }
 
-    /* Filters and Search Bar */
-    .filter-panel {
-      margin: 30px auto;
-      max-width: 900px;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 15px;
-    }
 
-    @media (max-width: 576px) {
-      .filter-panel {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .search-box-wrap {
-      position: relative;
-    }
-
-    .search-box-icon {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-dark);
-    }
-
-    .search-box {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px 16px 12px 42px;
-      color: #fff;
-      font-family: var(--font-body);
-      font-size: 14px;
-      width: 100%;
-      transition: all 0.2s;
-    }
-
-    .search-box:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
-    }
-
-    .sort-dropdown {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px 16px;
-      color: var(--text);
-      font-family: var(--font-body);
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    .sort-dropdown:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
 
     /* Grid Layout for posters */
     .grid {
@@ -690,7 +631,6 @@
   <script>
     // Storage Keys
     const WATCHED_KEY = "imdb_tracker_list_v2";
-    const WATCHLIST_KEY = "imdb_watchlist_data";
 
     // Hardcoded TMDB API Key from user configuration
     const API_KEY = "4f09deb9e0cba637e35e8490ba35dd3f";
@@ -807,9 +747,6 @@
         });
 
         activeList = [...movies];
-        
-        // Sync with user's watchlist
-        syncFromPersonalWatchlist();
         
         updateStats();
         renderMovies(activeList);
@@ -976,12 +913,10 @@
 
       if (watchedSet.has(id)) {
         watchedSet.delete(id);
-        updatePersonalWatchlist(movie, "want");
         if (cardElement) cardElement.classList.remove("watched");
         showToast(`Removed "${movie.name}" from watched list`);
       } else {
         watchedSet.add(id);
-        updatePersonalWatchlist(movie, "watched");
         if (cardElement) cardElement.classList.add("watched");
         showToast(`Marked "${movie.name}" as watched`);
       }
@@ -990,70 +925,7 @@
       updateStats();
     }
 
-    // Sync from personal movie database (index.html)
-    function syncFromPersonalWatchlist() {
-      const stored = localStorage.getItem(WATCHLIST_KEY);
-      if (!stored) return;
-      try {
-        const watchlist = JSON.parse(stored);
-        const watchedTitles = new Set(
-          watchlist
-            .filter(m => m.status === "watched")
-            .map(m => m.t.toLowerCase().trim())
-        );
 
-        let changed = false;
-        movies.forEach(m => {
-          const titleKeyNormalized = m.name.toLowerCase().trim();
-          const isWatchedInWatchlist = watchedTitles.has(titleKeyNormalized);
-          const isWatchedInTop250 = watchedSet.has(m.id);
-
-          if (isWatchedInWatchlist && !isWatchedInTop250) {
-            watchedSet.add(m.id);
-            changed = true;
-          } else if (!isWatchedInWatchlist && isWatchedInTop250) {
-            watchedSet.delete(m.id);
-            changed = true;
-          }
-        });
-
-        if (changed) {
-          saveLocalStorage();
-        }
-      } catch (e) {
-        console.error("Failed to sync from personal watchlist:", e);
-      }
-    }
-
-    // Update state in watchlist database
-    function updatePersonalWatchlist(movie, status) {
-      const stored = localStorage.getItem(WATCHLIST_KEY);
-      let watchlist = [];
-      if (stored) {
-        try { watchlist = JSON.parse(stored); } catch(e) {}
-      }
-
-      const titleKey = movie.name.toLowerCase().trim();
-      const existingIdx = watchlist.findIndex(m => m.t.toLowerCase().trim() === titleKey);
-
-      if (existingIdx >= 0) {
-        watchlist[existingIdx].status = status;
-      } else if (status === "watched") {
-        const posterUrl = movie.poster || "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=260&auto=format&fit=crop";
-
-        watchlist.push({
-          t: movie.name,
-          g: movie.genre.join(", ") || "Drama",
-          y: movie.year || 2010,
-          r: movie.rating || 7.0,
-          rt: 120,
-          p: posterUrl,
-          status: "watched"
-        });
-      }
-
-      localStorage.setItem(WATCHLIST_KEY, JSON.stringify(watchlist));
-    }
 
     function updateStats() {
       const count = watchedSet.size;
@@ -1258,10 +1130,9 @@
 
     // Cross-tab sync event
     window.addEventListener("storage", (e) => {
-      if (e.key === WATCHLIST_KEY || e.key === WATCHED_KEY) {
+      if (e.key === WATCHED_KEY) {
         loadLocalStorage();
         if (movies.length > 0) {
-          syncFromPersonalWatchlist();
           updateStats();
           renderMovies(activeList);
           calculateBadgesProgress();
