@@ -358,126 +358,167 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Wheel Spin Tab styling */
+    /* Suggest Tab styling */
     .wheel-view {
       display: none;
       padding: 20px 0 50px;
     }
 
-    .wheel-container-card {
-      max-width: 600px;
+    .suggest-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 900px;
       margin: 0 auto;
+    }
+
+    @media (max-width: 768px) {
+      .suggest-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+    }
+
+    .suggest-card {
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 30px;
+      padding: 24px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 30px;
-    }
-
-    .wheel-wrapper {
+      text-align: center;
+      gap: 20px;
+      min-height: 400px;
       position: relative;
-      width: 320px;
-      height: 320px;
-      border-radius: 50%;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      border: 4px solid var(--border);
-      background: #121212;
     }
 
-    .wheel-pointer {
-      position: absolute;
-      top: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 28px;
-      color: #fff;
-      z-index: 10;
-      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    .suggest-card-header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
-    #wheel-canvas {
-      display: block;
-      border-radius: 50%;
-    }
-
-    .wheel-center-btn {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: #fff;
-      color: #000;
-      border: 4px solid #121212;
-      font-family: var(--font-body);
+    .suggest-card-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent-copper);
       font-weight: 800;
+    }
+
+    .suggest-card-desc {
       font-size: 12px;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-      z-index: 5;
+      color: var(--text-dim);
+    }
+
+    /* Content Area inside Suggest Cards */
+    .suggest-content {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    /* Mystery Shuffler Card UI */
+    .mystery-box {
+      width: 120px;
+      height: 180px;
+      background: #16161f;
+      border: 2px dashed rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s ease;
-      letter-spacing: 0.5px;
+      font-size: 40px;
+      color: var(--text-dark);
+      transition: all 0.3s ease;
     }
 
-    .wheel-center-btn:hover:not(:disabled) {
-      transform: translate(-50%, -50%) scale(1.08);
-      background: #e0e0e0;
+    .mystery-box.shuffling {
+      border-color: var(--accent);
+      color: var(--accent);
+      animation: pulse 0.5s infinite alternate;
     }
 
-    .wheel-center-btn:disabled {
-      background: #444;
-      color: #777;
-      cursor: not-allowed;
+    @keyframes pulse {
+      from { transform: scale(1); opacity: 0.8; }
+      to { transform: scale(1.05); opacity: 1; }
     }
 
-    .wheel-result-card {
+    /* Shuffling text transition */
+    .shuffle-title-transition {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-dim);
+      filter: blur(4px);
+      transition: filter 0.1s ease;
+      height: 24px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
       width: 100%;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 15px;
       text-align: center;
-      animation: fadeIn 0.4s ease;
+      margin-top: 15px;
     }
 
-    .wheel-result-movie {
+    .shuffle-title-transition.clear {
+      filter: none;
+      color: #fff;
+    }
+
+    /* Winner Presentation Layout */
+    .recommendation-card {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 12px;
+      width: 100%;
+      animation: fadeIn 0.4s ease;
     }
 
-    .wheel-result-title {
-      font-size: 18px;
+    .rec-poster-container {
+      width: 90px;
+      height: 135px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #16161f;
+      border: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+    }
+
+    .rec-poster-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .rec-title {
+      font-size: 16px;
       font-weight: 700;
       color: #fff;
     }
 
-    .wheel-result-meta {
-      font-size: 13px;
+    .rec-meta {
+      font-size: 12px;
       color: var(--text-dim);
+      line-height: 1.4;
     }
 
-    .wheel-result-actions {
+    .suggest-actions {
       display: flex;
       gap: 10px;
-      margin-top: 5px;
+      width: 100%;
+      justify-content: center;
+      margin-top: 10px;
     }
 
-    .wheel-btn {
-      padding: 8px 16px;
+    /* General recommendation button styles */
+    .suggest-btn {
+      padding: 10px 20px;
       border-radius: 6px;
       font-family: var(--font-body);
       font-size: 13px;
@@ -487,24 +528,29 @@
       border: 1px solid var(--border);
     }
 
-    .wheel-btn.primary {
+    .suggest-btn.primary {
       background: #fff;
       color: #000;
       border-color: #fff;
     }
 
-    .wheel-btn.primary:hover {
+    .suggest-btn.primary:hover:not(:disabled) {
       background: #e0e0e0;
       border-color: #e0e0e0;
     }
 
-    .wheel-btn.secondary {
+    .suggest-btn.secondary {
       background: transparent;
       color: #fff;
     }
 
-    .wheel-btn.secondary:hover {
+    .suggest-btn.secondary:hover:not(:disabled) {
       background: rgba(255, 255, 255, 0.05);
+    }
+
+    .suggest-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     @keyframes fadeIn {
@@ -633,15 +679,32 @@
       </div>
     </div>
 
-    <!-- Wheel Spin Tab Content -->
+    <!-- Suggestions Tab Content -->
     <div id="wheel-view" class="wheel-view">
-      <div class="wheel-container-card">
-        <div class="wheel-wrapper">
-          <div class="wheel-pointer"><i class="fa-solid fa-caret-down"></i></div>
-          <canvas id="wheel-canvas" width="320" height="320"></canvas>
-          <button id="wheel-spin-btn" class="wheel-center-btn">SPIN</button>
+      <div class="suggest-container">
+        
+        <!-- Daily Recommendation Card -->
+        <div class="suggest-card">
+          <div class="suggest-card-header">
+            <div class="suggest-card-title">Daily Pick</div>
+            <div class="suggest-card-desc">Your cinematic recommendation for today</div>
+          </div>
+          <div class="suggest-content" id="daily-content">
+            <!-- Injected Dynamically -->
+          </div>
         </div>
-        <div class="wheel-result-card" id="wheel-result" style="display: none;"></div>
+
+        <!-- Shuffle Recommendation Card -->
+        <div class="suggest-card">
+          <div class="suggest-card-header">
+            <div class="suggest-card-title">Surprise Me</div>
+            <div class="suggest-card-desc">Shuffle to recommend a random movie</div>
+          </div>
+          <div class="suggest-content" id="shuffle-content">
+            <!-- Injected Dynamically -->
+          </div>
+        </div>
+
       </div>
     </div>
   </main>
@@ -653,8 +716,8 @@
       <span>Home</span>
     </div>
     <div class="nav-btn" id="btn-wheel">
-      <i class="fa-solid fa-arrows-spin"></i>
-      <span>Spin</span>
+      <i class="fa-solid fa-shuffle"></i>
+      <span>Suggest</span>
     </div>
     <div class="nav-btn" id="btn-badges">
       <i class="fa-solid fa-award"></i>
@@ -700,10 +763,8 @@
 
     // DOM cache
     let grid, badgeList, barEl, viewHome, viewBadges, viewWheel, btnHome, btnBadges, btnWheel;
-    let wheelCanvas, wheelSpinBtn, wheelResultEl;
-    let wheelRotation = 0;
-    let selectedWheelMovies = [];
-    let isWheelSpinning = false;
+    let dailyContentEl, shuffleContentEl;
+    let isShuffling = false;
 
     // Initialize application on DOM load
     window.addEventListener("DOMContentLoaded", () => {
@@ -717,9 +778,8 @@
       btnBadges = document.getElementById("btn-badges");
       btnWheel = document.getElementById("btn-wheel");
       
-      wheelCanvas = document.getElementById("wheel-canvas");
-      wheelSpinBtn = document.getElementById("wheel-spin-btn");
-      wheelResultEl = document.getElementById("wheel-result");
+      dailyContentEl = document.getElementById("daily-content");
+      shuffleContentEl = document.getElementById("shuffle-content");
 
       init();
     });
@@ -816,7 +876,7 @@
       btnHome.addEventListener("click", () => switchTab('home'));
       btnWheel.addEventListener("click", () => {
         switchTab('wheel');
-        initWheel();
+        initSuggestions();
       });
       btnBadges.addEventListener("click", () => switchTab('badges'));
     }
@@ -1088,206 +1148,182 @@
       btnBadges.classList.toggle('active', tabId === 'badges');
     }
 
-    // Wheel spin functions
-    function initWheel() {
-      // Clear result card
-      wheelResultEl.style.display = "none";
-      wheelResultEl.innerHTML = "";
+    // Suggestions generation functions
+    function initSuggestions() {
+      initDailyPick();
+      initShufflePick(false);
+    }
+
+    function initDailyPick() {
+      dailyContentEl.innerHTML = "";
       
-      // Get unwatched movies
-      const unwatched = movies.filter(m => !watchedSet.has(m.id));
+      const today = new Date();
+      const dateStr = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
       
-      if (unwatched.length === 0) {
-        // Draw empty wheel message
-        const ctx = wheelCanvas.getContext("2d");
-        ctx.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
-        ctx.fillStyle = "#181818";
-        ctx.beginPath();
-        ctx.arc(160, 160, 150, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = "#fff";
-        ctx.textAlign = "center";
-        ctx.font = "14px Outfit";
-        ctx.fillText("All movies watched!", 160, 155);
-        ctx.fillText("Reset list to spin.", 160, 175);
-        wheelSpinBtn.disabled = true;
-        return;
-      }
-      
-      wheelSpinBtn.disabled = false;
-      
-      // Pick 8 random unwatched movies (or repeat if fewer than 8)
-      selectedWheelMovies = [];
-      const numSlots = 8;
-      
-      for (let i = 0; i < numSlots; i++) {
-        if (unwatched.length > 0) {
-          const randomIndex = Math.floor(Math.random() * unwatched.length);
-          // To ensure variety, try to pick unique ones first if possible
-          const available = unwatched.filter(m => !selectedWheelMovies.includes(m));
-          if (available.length > 0) {
-            const pick = available[Math.floor(Math.random() * available.length)];
-            selectedWheelMovies.push(pick);
-          } else {
-            selectedWheelMovies.push(unwatched[Math.floor(Math.random() * unwatched.length)]);
+      let dailyPick = null;
+      try {
+        const saved = localStorage.getItem('imdb_daily_pick_v2');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.date === dateStr) {
+            dailyPick = movies.find(m => m.id === parsed.id);
           }
         }
-      }
+      } catch(e) {}
       
-      // Draw initial wheel
-      wheelRotation = 0;
-      drawWheel(0);
-      
-      // Add spin listener
-      wheelSpinBtn.onclick = spinWheel;
-    }
-
-    function drawWheel(rotation) {
-      if (!wheelCanvas) return;
-      const ctx = wheelCanvas.getContext("2d");
-      const width = wheelCanvas.width;
-      const height = wheelCanvas.height;
-      const centerX = width / 2;
-      const centerY = height / 2;
-      const radius = 150;
-      
-      ctx.clearRect(0, 0, width, height);
-      
-      const numSectors = selectedWheelMovies.length;
-      if (numSectors === 0) return;
-      const arc = Math.PI * 2 / numSectors;
-      
-      const colors = ["#16161f", "#1d1d28", "#121216", "#20202a", "#1a1a22", "#24242e", "#0f0f14", "#282836"];
-      
-      ctx.save();
-      ctx.translate(centerX, centerY);
-      ctx.rotate(rotation);
-      ctx.translate(-centerX, -centerY);
-      
-      for (let i = 0; i < numSectors; i++) {
-        const angle = i * arc;
-        
-        // Draw sector pie slice
-        ctx.fillStyle = colors[i % colors.length];
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.arc(centerX, centerY, radius, angle, angle + arc);
-        ctx.closePath();
-        ctx.fill();
-        
-        // Draw sector divider border
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-        
-        // Draw text
-        ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(angle + arc / 2);
-        ctx.textAlign = "right";
-        ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
-        ctx.font = "600 11px Outfit";
-        
-        let title = selectedWheelMovies[i].name;
-        if (title.length > 18) title = title.substring(0, 16) + "...";
-        
-        ctx.fillText(title, radius - 15, 4);
-        ctx.restore();
-      }
-      
-      ctx.restore();
-      
-      // Draw inner core hub circle
-      ctx.fillStyle = "#fff";
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, 32, 0, Math.PI * 2);
-      ctx.fill();
-      
-      ctx.fillStyle = "#121212";
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, 28, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    function spinWheel() {
-      if (isWheelSpinning) return;
-      isWheelSpinning = true;
-      wheelSpinBtn.disabled = true;
-      wheelResultEl.style.display = "none";
-      
-      const numSectors = selectedWheelMovies.length;
-      const arc = Math.PI * 2 / numSectors;
-      
-      // Random winner index
-      const winnerIndex = Math.floor(Math.random() * numSectors);
-      
-      const startRotation = wheelRotation % (2 * Math.PI);
-      const targetFraction = (1.5 * Math.PI - (winnerIndex * arc + arc / 2)) - startRotation;
-      let normalizedFraction = targetFraction;
-      while (normalizedFraction < 0) normalizedFraction += 2 * Math.PI;
-      
-      // Spin at least 5 times
-      const targetRotation = wheelRotation + 5 * 2 * Math.PI + normalizedFraction;
-      const startRotationVal = wheelRotation;
-      
-      let startTime = null;
-      const duration = 4000; // 4 seconds
-      
-      function animate(timestamp) {
-        if (!startTime) startTime = timestamp;
-        const elapsed = timestamp - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        // cubic ease-out for realistic friction slowing down
-        const easeOut = 1 - Math.pow(1 - progress, 4);
-        wheelRotation = startRotationVal + (targetRotation - startRotationVal) * easeOut;
-        
-        drawWheel(wheelRotation);
-        
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          isWheelSpinning = false;
-          wheelSpinBtn.disabled = false;
-          wheelRotation = targetRotation;
-          showWinner(selectedWheelMovies[winnerIndex]);
+      // If no valid daily pick saved for today, select a new one from unwatched
+      if (!dailyPick) {
+        const unwatched = movies.filter(m => !watchedSet.has(m.id));
+        if (unwatched.length === 0) {
+          dailyContentEl.innerHTML = `
+            <div style="color: var(--text-dark); margin: auto 0;">
+              <i class="fa-solid fa-circle-check" style="font-size: 32px; margin-bottom: 10px;"></i>
+              <p>All movies watched!</p>
+            </div>
+          `;
+          return;
         }
+        
+        // Pick deterministically based on date seed
+        let hash = 0;
+        for (let i = 0; i < dateStr.length; i++) {
+          hash = (hash << 5) - hash + dateStr.charCodeAt(i);
+          hash |= 0;
+        }
+        const index = Math.abs(hash) % unwatched.length;
+        dailyPick = unwatched[index];
+        
+        // Save to localStorage
+        localStorage.setItem('imdb_daily_pick_v2', JSON.stringify({date: dateStr, id: dailyPick.id}));
       }
       
-      requestAnimationFrame(animate);
-    }
-
-    function showWinner(movie) {
-      wheelResultEl.innerHTML = `
-        <div class="wheel-result-movie">
-          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-copper); font-weight: 700;">Your Recommendation Today</div>
-          <div class="wheel-result-title">${movie.name} (${movie.year})</div>
-          <div class="wheel-result-meta">Rank #${movie.rank} &bull; Directed by ${movie.directors ? movie.directors.join(', ') : 'Unknown'}</div>
-          
-          <div class="wheel-result-actions">
-            <button class="wheel-btn primary" id="winner-watch-btn">Mark as Watched</button>
-            <button class="wheel-btn secondary" id="winner-spin-again">Spin Again</button>
+      const isWatched = watchedSet.has(dailyPick.id);
+      
+      // Render daily movie card
+      dailyContentEl.innerHTML = `
+        <div class="recommendation-card">
+          <div class="rec-poster-container">
+            ${dailyPick.poster ? `<img src="${dailyPick.poster}" alt="${dailyPick.title}" />` : `
+              <div class="placeholder-poster" style="display: flex; background: linear-gradient(135deg, #16161f 0%, #0e0e12 100%);">
+                <i class="fa-solid fa-film"></i>
+              </div>
+            `}
+          </div>
+          <div class="rec-title">${dailyPick.name} (${dailyPick.year})</div>
+          <div class="rec-meta">Rank #${dailyPick.rank} &bull; Dir: ${dailyPick.directors ? dailyPick.directors.join(', ') : 'Unknown'}</div>
+          <div class="suggest-actions">
+            <button class="suggest-btn primary" id="daily-watch-btn" ${isWatched ? 'disabled' : ''}>
+              ${isWatched ? 'Watched' : 'Mark as Watched'}
+            </button>
           </div>
         </div>
       `;
       
-      wheelResultEl.style.display = "block";
+      const watchBtn = document.getElementById("daily-watch-btn");
+      if (watchBtn && !isWatched) {
+        watchBtn.onclick = () => {
+          toggleWatched(dailyPick.id, null);
+          watchBtn.textContent = "Watched";
+          watchBtn.disabled = true;
+        };
+      }
+    }
+
+    function initShufflePick(autoStart) {
+      if (autoStart) {
+        startShuffle();
+      } else {
+        // Show initial Mystery state
+        shuffleContentEl.innerHTML = `
+          <div class="mystery-box">
+            <i class="fa-solid fa-question"></i>
+          </div>
+          <div style="margin-top: 10px; width: 100%; display: flex; justify-content: center;">
+            <button class="suggest-btn primary" id="start-shuffle-btn">Shuffle Movie</button>
+          </div>
+        `;
+        document.getElementById("start-shuffle-btn").onclick = startShuffle;
+      }
+    }
+
+    function startShuffle() {
+      if (isShuffling) return;
+      isShuffling = true;
       
-      // Hook up actions
-      document.getElementById("winner-spin-again").onclick = () => {
-        initWheel();
-        spinWheel();
-      };
+      const unwatched = movies.filter(m => !watchedSet.has(m.id));
+      if (unwatched.length === 0) {
+        shuffleContentEl.innerHTML = `
+          <div style="color: var(--text-dark); margin: auto 0;">
+            <i class="fa-solid fa-circle-check" style="font-size: 32px; margin-bottom: 10px;"></i>
+            <p>All movies watched!</p>
+          </div>
+        `;
+        isShuffling = false;
+        return;
+      }
       
-      const watchBtn = document.getElementById("winner-watch-btn");
-      watchBtn.onclick = () => {
-        // Toggle watched in database
-        toggleWatched(movie.id, null);
-        // Change button state
-        watchBtn.textContent = "Watched!";
-        watchBtn.disabled = true;
-        watchBtn.style.opacity = 0.5;
-      };
+      // Shuffle animation: cycle random movie titles rapidly
+      shuffleContentEl.innerHTML = `
+        <div class="mystery-box shuffling">
+          <i class="fa-solid fa-shuffle fa-spin"></i>
+        </div>
+        <div class="shuffle-title-transition" id="shuffle-transition-text">Selecting...</div>
+      `;
+      
+      const textEl = document.getElementById("shuffle-transition-text");
+      
+      let count = 0;
+      const interval = setInterval(() => {
+        const rand = unwatched[Math.floor(Math.random() * unwatched.length)];
+        if (textEl) textEl.textContent = rand.name;
+        count++;
+        
+        if (count >= 15) {
+          clearInterval(interval);
+          isShuffling = false;
+          
+          // Select final winner
+          const winner = unwatched[Math.floor(Math.random() * unwatched.length)];
+          showShuffleWinner(winner);
+        }
+      }, 90);
+    }
+
+    function showShuffleWinner(movie) {
+      const isWatched = watchedSet.has(movie.id);
+      
+      shuffleContentEl.innerHTML = `
+        <div class="recommendation-card">
+          <div class="rec-poster-container">
+            ${movie.poster ? `<img src="${movie.poster}" alt="${movie.title}" />` : `
+              <div class="placeholder-poster" style="display: flex; background: linear-gradient(135deg, #16161f 0%, #0e0e12 100%);">
+                <i class="fa-solid fa-film"></i>
+              </div>
+            `}
+          </div>
+          <div class="rec-title">${movie.name} (${movie.year})</div>
+          <div class="rec-meta">Rank #${movie.rank} &bull; Dir: ${movie.directors ? movie.directors.join(', ') : 'Unknown'}</div>
+          <div class="suggest-actions">
+            <button class="suggest-btn primary" id="shuffle-watch-btn" ${isWatched ? 'disabled' : ''}>
+              ${isWatched ? 'Watched' : 'Mark as Watched'}
+            </button>
+            <button class="suggest-btn secondary" id="shuffle-again-btn">
+              Shuffle Again
+            </button>
+          </div>
+        </div>
+      `;
+      
+      const watchBtn = document.getElementById("shuffle-watch-btn");
+      if (watchBtn && !isWatched) {
+        watchBtn.onclick = () => {
+          toggleWatched(movie.id, null);
+          watchBtn.textContent = "Watched";
+          watchBtn.disabled = true;
+        };
+      }
+      
+      document.getElementById("shuffle-again-btn").onclick = startShuffle;
     }
 
     // Render Badges
