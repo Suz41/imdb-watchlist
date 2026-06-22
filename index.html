@@ -653,18 +653,7 @@
   <main class="container">
     <!-- Grid View Tab Content -->
     <div id="home-view">
-      <div class="filter-panel" id="search-container">
-        <div class="search-box-wrap">
-          <i class="fa-solid fa-magnifying-glass search-box-icon"></i>
-          <input type="text" id="search" class="search-box" placeholder="Filter films by title, director, actors, year..." />
-        </div>
-        <select id="sort-select" class="sort-dropdown" onchange="handleSort(this.value)">
-          <option value="rank">IMDb Rating Rank (1-250)</option>
-          <option value="rating">Highest Rating First</option>
-          <option value="year-desc">Release Year (Newest)</option>
-          <option value="year-asc">Release Year (Oldest)</option>
-        </select>
-      </div>
+
 
       <div class="grid" id="grid">
         <div class="loader-overlay" id="loading-spinner">
@@ -717,8 +706,6 @@
     let movies = [];
     let activeList = [];
     let watchedSet = new Set();
-    let query = "";
-    let sortBy = "rank";
 
     // Badges definitions
     const ACHIEVEMENTS = [
@@ -735,18 +722,16 @@
     ];
 
     // DOM cache
-    let grid, badgeList, searchInput, watchedCountEl, barEl, viewHome, viewBadges, searchContainer, btnHome, btnBadges;
+    let grid, badgeList, watchedCountEl, barEl, viewHome, viewBadges, btnHome, btnBadges;
 
     // Initialize application on DOM load
     window.addEventListener("DOMContentLoaded", () => {
       grid = document.getElementById("grid");
       badgeList = document.getElementById("badge-list");
-      searchInput = document.getElementById("search");
       watchedCountEl = document.getElementById("watched-count") || {textContent: ''};
       barEl = document.getElementById("overall-fill");
       viewHome = document.getElementById("home-view");
       viewBadges = document.getElementById("badges-view");
-      searchContainer = document.getElementById("search-container");
       btnHome = document.getElementById("btn-home");
       btnBadges = document.getElementById("btn-badges");
 
@@ -827,7 +812,7 @@
         syncFromPersonalWatchlist();
         
         updateStats();
-        filterAndSort();
+        renderMovies(activeList);
         
         // Dynamically start fetching missing TMDB poster art in background
         initFetchQueue();
@@ -845,11 +830,6 @@
 
     // Setup input and click event listeners
     function setupListeners() {
-      searchInput.addEventListener("input", e => {
-        query = e.target.value.toLowerCase().trim();
-        filterAndSort();
-      });
-      
       btnHome.addEventListener("click", () => switchTab('home'));
       btnBadges.addEventListener("click", () => switchTab('badges'));
     }
@@ -1203,7 +1183,6 @@
     // Tabs toggle
     function switchTab(tabId) {
       viewHome.style.display = tabId === 'home' ? 'block' : 'none';
-      searchContainer.style.display = tabId === 'home' ? 'block' : 'none';
       viewBadges.style.display = tabId === 'badges' ? 'block' : 'none';
 
       btnHome.classList.toggle('active', tabId === 'home');
@@ -1275,34 +1254,7 @@
       document.getElementById("unlocked-count").textContent = unlockedCount;
     }
 
-    // Filter and Sort actions
-    function handleSort(val) {
-      sortBy = val;
-      filterAndSort();
-    }
 
-    function filterAndSort() {
-      activeList = movies.filter(m => {
-        return !query || 
-          m.name.toLowerCase().includes(query) ||
-          (m.directors && m.directors.some(d => d.toLowerCase().includes(query))) ||
-          (m.actors && m.actors.some(a => a.toLowerCase().includes(query))) ||
-          (m.genre && m.genre.some(g => g.toLowerCase().includes(query))) ||
-          m.year.toString().includes(query);
-      });
-
-      if (sortBy === 'rank') {
-        activeList.sort((a,b) => a.rank - b.rank);
-      } else if (sortBy === 'rating') {
-        activeList.sort((a,b) => b.rating - a.rating || a.rank - b.rank);
-      } else if (sortBy === 'year-desc') {
-        activeList.sort((a,b) => b.year - a.year || a.rank - b.rank);
-      } else if (sortBy === 'year-asc') {
-        activeList.sort((a,b) => a.year - b.year || a.rank - b.rank);
-      }
-
-      renderMovies(activeList);
-    }
 
     // Cross-tab sync event
     window.addEventListener("storage", (e) => {
@@ -1311,7 +1263,7 @@
         if (movies.length > 0) {
           syncFromPersonalWatchlist();
           updateStats();
-          filterAndSort();
+          renderMovies(activeList);
           calculateBadgesProgress();
         }
       }
